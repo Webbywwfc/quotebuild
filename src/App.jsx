@@ -1001,7 +1001,7 @@ export default function App() {
               <input
                 value={companyName}
                 onChange={e=>setCompanyName(e.target.value)}
-                placeholder="e.g. Webb Construction Ltd"
+                placeholder="e.g. ABC Construction Ltd"
                 style={{...inp, fontSize:"15px"}}
                 autoFocus
               />
