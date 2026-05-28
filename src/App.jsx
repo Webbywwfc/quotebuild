@@ -940,7 +940,7 @@ export default function App() {
             <div style={{color:"#f59e0b",fontSize:"11px",...mo,letterSpacing:"0.1em",marginBottom:"14px"}}>⚙ DEFAULT SETTINGS — saved automatically</div>
             <div style={{marginBottom:"14px"}}>
               <label style={lbl}>YOUR COMPANY NAME</label>
-              <input value={companyName} onChange={e=>setCompanyName(e.target.value)} placeholder="e.g. Webb Construction Ltd" style={inp}/>
+              <input value={companyName} onChange={e=>setCompanyName(e.target.value)} placeholder="e.g. ABC Construction Ltd" style={inp}/>
             </div>
             <div style={{marginBottom:"14px"}}>
               <label style={lbl}>VAT REGISTERED</label>
