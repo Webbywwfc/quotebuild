@@ -334,9 +334,9 @@ Rules:
 - Do not use placeholders like [NAME] - use the actual names provided`;
 
     try {
-      const res = await fetch("/api/generate", {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
         method:"POST",
-        headers:{"content-type":"application/json"},
+        headers:{"content-type":"application/json","x-api-key":"placeholder","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
         body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:500,messages:[{role:"user",content:prompt}]})
       });
       const data = await res.json();
@@ -454,7 +454,7 @@ function EditableCell({ value, onChange, isQty=false }) {
   );
 }
 
-function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatRegistered=true, historyId, jobDesc, onSaveTerms, onReset }) {
+function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatRegistered=true, historyId, jobDesc, onQuoteChange, onSaveTerms, onReset }) {
   const initQ = {...init, notes: defaultTerms || init.notes};
   if (!vatRegistered) { initQ.vatAmount = 0; initQ.grandTotal = initQ.subtotal; }
   const [q, setQ] = useState(initQ);
@@ -476,7 +476,9 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
   const recalc = (items, rate=vatRate) => {
     const sub = items.reduce((s,i)=>s+Number(i.total),0);
     const vat = vatRegistered ? sub*(rate/100) : 0;
-    return {...q, lineItems:items, subtotal:sub, vatRate:rate, vatAmount:vat, grandTotal:sub+vat};
+    const updated = {...q, lineItems:items, subtotal:sub, vatRate:rate, vatAmount:vat, grandTotal:sub+vat};
+    if (onQuoteChange) onQuoteChange(updated);
+    return updated;
   };
 
   const handleVatRateChange = (rate) => {
@@ -560,7 +562,7 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
           <td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:13px;text-align:right;font-weight:600">£${Number(item.total).toFixed(2)}</td>
         </tr>`).join("")}`).join("");
 
-    const html = `<!DOCTYPE html><html><head><title>Quote ${q.jobRef}</title>
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Quote ${q.jobRef}</title>
     <style>
       body{font-family:Arial,sans-serif;margin:0;padding:32px;color:#111;max-width:820px;margin:0 auto}
       h1{font-size:22px;margin:0 0 4px}
@@ -870,9 +872,9 @@ export default function App() {
     const materialsLine = materialsHints ? `Specific materials or parts with known prices (use these exact figures):\n${materialsHints}\n` : "";
     const msg = `${companyName?`Company: ${companyName}\n\n`:""}${labourLine}${materialsLine}Job Description: ${jobDesc}\n\nRespond with ONLY valid JSON.`;
     try {
-      const res = await fetch("/api/generate", {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
         method:"POST",
-        headers:{"content-type":"application/json"},
+        headers:{"content-type":"application/json","x-api-key":"placeholder","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
         body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:4000,system:SYSTEM_PROMPT,messages:[{role:"user",content:msg}]})
       });
       const data = await res.json();
@@ -1176,6 +1178,7 @@ export default function App() {
             vatRegistered={vatRegistered}
             historyId={currentHistoryId}
             jobDesc={jobDesc}
+            onQuoteChange={(updatedQuote)=>setQuote(updatedQuote)}
             onSaveTerms={(terms)=>{ setDefaultTerms(terms); saveSettings({companyName, defaultTerms:terms, labourRate, vatRegistered}); }}
             onReset={reset}
           />
