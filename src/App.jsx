@@ -334,9 +334,9 @@ Rules:
 - Do not use placeholders like [NAME] - use the actual names provided`;
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/api/generate", {
         method:"POST",
-        headers:{"content-type":"application/json","x-api-key":"placeholder","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+        headers:{"content-type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:500,messages:[{role:"user",content:prompt}]})
       });
       const data = await res.json();
@@ -473,11 +473,16 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
     }
   };
 
+  const autoSave = (updatedQuote) => {
+    if (onQuoteChange) onQuoteChange(updatedQuote);
+    if (historyId) updateInHistory(historyId, updatedQuote, clientInfo, companyName, jobDesc);
+  };
+
   const recalc = (items, rate=vatRate) => {
     const sub = items.reduce((s,i)=>s+Number(i.total),0);
     const vat = vatRegistered ? sub*(rate/100) : 0;
     const updated = {...q, lineItems:items, subtotal:sub, vatRate:rate, vatAmount:vat, grandTotal:sub+vat};
-    if (onQuoteChange) onQuoteChange(updated);
+    autoSave(updated);
     return updated;
   };
 
@@ -485,7 +490,9 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
     setVatRate(rate);
     const sub = q.lineItems.reduce((s,i)=>s+Number(i.total),0);
     const vat = vatRegistered ? sub*(rate/100) : 0;
-    setQ(prev=>({...prev, vatRate:rate, vatAmount:vat, grandTotal:sub+vat}));
+    const updated = {...q, vatRate:rate, vatAmount:vat, grandTotal:sub+vat};
+    setQ(updated);
+    autoSave(updated);
   };
 
   const updateItem = (idx, field, val) => {
@@ -500,12 +507,16 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
 
   const updateDesc = (idx, val) => {
     const items = q.lineItems.map((it,i)=>i===idx?{...it,description:val}:it);
-    setQ({...q, lineItems:items});
+    const updated = {...q, lineItems:items};
+    setQ(updated);
+    autoSave(updated);
   };
 
   const updateUnit = (idx, val) => {
     const items = q.lineItems.map((it,i)=>i===idx?{...it,unit:val}:it);
-    setQ({...q, lineItems:items});
+    const updated = {...q, lineItems:items};
+    setQ(updated);
+    autoSave(updated);
   };
 
   const deleteItem = (idx) => setQ(recalc(q.lineItems.filter((_,i)=>i!==idx)));
@@ -782,7 +793,7 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
         {editingNotes ? (
           <textarea
             value={q.notes}
-            onChange={e=>setQ(prev=>({...prev,notes:e.target.value}))}
+            onChange={e=>{ const updated={...q,notes:e.target.value}; setQ(updated); autoSave(updated); }}
             rows={5}
             style={{width:"100%",background:"#1a1a1a",border:"1px solid #f59e0b",borderRadius:"6px",color:"#e5e7eb",fontSize:"13px",padding:"10px 12px",fontFamily:"sans-serif",lineHeight:1.6,resize:"vertical"}}
           />
@@ -801,8 +812,8 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
           ✉ GENERATE EMAIL
         </button>
         <button onClick={handleSave}
-          style={{background:saved?"#065f46":"#1a1a1a",border:`1px solid ${saved?"#059669":"#3a3a3a"}`,color:saved?"#34d399":"#e5e7eb",padding:"10px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer"}}>
-          {saved?"✓ SAVED":"💾 SAVE EDITS"}
+          style={{background:saved?"#065f46":"#1a1a1a",border:`1px solid ${saved?"#059669":"#3a3a3a"}`,color:saved?"#34d399":"#6b7280",padding:"10px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer"}}>
+          {saved?"✓ SAVED":"💾 SAVE"}
         </button>
         <button onClick={handleCopy}
           style={{background:copied?"#065f46":"#1a1a1a",border:`1px solid ${copied?"#059669":"#3a3a3a"}`,color:copied?"#34d399":"#e5e7eb",padding:"10px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer"}}>
@@ -872,9 +883,9 @@ export default function App() {
     const materialsLine = materialsHints ? `Specific materials or parts with known prices (use these exact figures):\n${materialsHints}\n` : "";
     const msg = `${companyName?`Company: ${companyName}\n\n`:""}${labourLine}${materialsLine}Job Description: ${jobDesc}\n\nRespond with ONLY valid JSON.`;
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/api/generate", {
         method:"POST",
-        headers:{"content-type":"application/json","x-api-key":"placeholder","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+        headers:{"content-type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:4000,system:SYSTEM_PROMPT,messages:[{role:"user",content:msg}]})
       });
       const data = await res.json();
