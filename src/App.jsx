@@ -932,16 +932,16 @@ export default function App() {
               <div style={{color:"#4b5563",fontSize:"10px",...mo,letterSpacing:"0.1em"}}>AI QUOTE GENERATOR FOR BUILDERS</div>
             </div>
           </div>
-          <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
+          <div style={{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap",justifyContent:"flex-end"}}>
             <button onClick={()=>setShowHistory(v=>!v)}
-              style={{background:showHistory?"#1a1a1a":"transparent",border:"1px solid #2a2a2a",color:showHistory?"#f59e0b":"#6b7280",padding:"6px 12px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}>
+              style={{background:showHistory?"#1a1a1a":"transparent",border:"1px solid #2a2a2a",color:showHistory?"#f59e0b":"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
               📋 HISTORY
             </button>
             <button onClick={()=>setShowSettings(v=>!v)}
-              style={{background:showSettings?"#1a1a1a":"transparent",border:"1px solid #2a2a2a",color:showSettings?"#f59e0b":"#6b7280",padding:"6px 12px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}>
+              style={{background:showSettings?"#1a1a1a":"transparent",border:"1px solid #2a2a2a",color:showSettings?"#f59e0b":"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
               ⚙ {showSettings?"HIDE":"SETTINGS"}
             </button>
-            {step==="result"&&<button onClick={reset} style={{background:"transparent",border:"1px solid #2a2a2a",color:"#6b7280",padding:"6px 12px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}>← NEW QUOTE</button>}
+            {step==="result"&&<button onClick={reset} style={{background:"transparent",border:"1px solid #2a2a2a",color:"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>← NEW QUOTE</button>}
           </div>
         </div>
       </div>
