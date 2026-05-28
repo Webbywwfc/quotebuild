@@ -337,7 +337,7 @@ Rules:
       const res = await fetch("/api/generate", {
         method:"POST",
         headers:{"content-type":"application/json"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:prompt}]})
+        body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:500,messages:[{role:"user",content:prompt}]})
       });
       const data = await res.json();
       if (!res.ok) { setEmail("Error generating email. Please try again."); setLoading(false); return; }
