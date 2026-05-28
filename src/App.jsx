@@ -48,8 +48,8 @@ const css = `
   @media print { .no-print { display:none !important; } body { margin:0; } }
 `;
 
-const STORAGE_KEY = "quotebuild_settings";
-const HISTORY_KEY = "quotebuild_history";
+const STORAGE_KEY = "briefquote_settings";
+const HISTORY_KEY = "briefquote_history";
 
 function loadSettings() {
   try {
@@ -928,7 +928,7 @@ export default function App() {
           <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
             <div style={{width:"32px",height:"32px",background:"#f59e0b",borderRadius:"6px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"15px"}}>🏗</div>
             <div>
-              <div style={{fontSize:"18px",fontWeight:800,color:"#fff",letterSpacing:"0.04em",lineHeight:1}}>QUOTEBUILD</div>
+              <div style={{fontSize:"18px",fontWeight:800,color:"#fff",letterSpacing:"0.04em",lineHeight:1}}>BRIEFQUOTE</div>
               <div style={{color:"#4b5563",fontSize:"10px",...mo,letterSpacing:"0.1em"}}>AI QUOTE GENERATOR FOR BUILDERS</div>
             </div>
           </div>
@@ -1005,7 +1005,7 @@ export default function App() {
           <div style={{animation:"fadeUp 0.4s ease forwards"}}>
             <div style={{textAlign:"center",marginBottom:"32px"}}>
               <div style={{width:"56px",height:"56px",background:"#f59e0b",borderRadius:"12px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",margin:"0 auto 16px"}}>🏗</div>
-              <h1 style={{fontSize:"32px",fontWeight:800,color:"#fff",margin:"0 0 8px 0",lineHeight:1.1}}>Welcome to QuoteBuild</h1>
+              <h1 style={{fontSize:"32px",fontWeight:800,color:"#fff",margin:"0 0 8px 0",lineHeight:1.1}}>Welcome to BriefQuote</h1>
               <p style={{color:"#6b7280",fontSize:"15px",margin:0}}>Quick setup — takes 30 seconds. You can change these anytime.</p>
             </div>
 
@@ -1025,7 +1025,7 @@ export default function App() {
 
             {/* How it works — shown once on setup only */}
             <div style={{background:"#0f0f0f",border:"1px solid #1f1f1f",borderRadius:"10px",padding:"20px",marginBottom:"12px"}}>
-              <div style={{color:"#f59e0b",fontSize:"11px",fontFamily:"monospace",letterSpacing:"0.1em",marginBottom:"14px"}}>✦ HOW QUOTEBUILD WORKS</div>
+              <div style={{color:"#f59e0b",fontSize:"11px",fontFamily:"monospace",letterSpacing:"0.1em",marginBottom:"14px"}}>✦ HOW BRIEFQUOTE WORKS</div>
               <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
                 {[
                   ["⚡","Describe any job and get a professional itemised quote in seconds"],
@@ -1208,7 +1208,7 @@ export default function App() {
 
       <div className="no-print" style={{borderTop:"1px solid #111",padding:"12px 20px",marginTop:"24px"}}>
         <div style={{maxWidth:"740px",margin:"0 auto",display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
-          <span style={{color:"#374151",fontSize:"11px",...mo}}>QUOTEBUILD © 2026</span>
+          <span style={{color:"#374151",fontSize:"11px",...mo}}>BRIEFQUOTE © 2026</span>
           <span style={{color:"#374151",fontSize:"11px",...mo}}>ALWAYS VERIFY RATES WITH YOUR SUPPLIER</span>
         </div>
       </div>
