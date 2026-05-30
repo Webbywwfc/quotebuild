@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-const SYSTEM_PROMPT = `You are an expert quantity surveyor and builder's estimator with 20 years of UK construction experience.
+const SYSTEM_PROMPT = `You are an expert UK trades estimator with 20 years of experience pricing work across all trades — including builders, plumbers, electricians, plasterers, painters and decorators, tilers, joiners, roofers and landscapers.
 
 When given a job description, generate a conservative, realistic builder's quote in JSON format.
 
