@@ -2,12 +2,25 @@ import { useState, useEffect, useRef } from "react";
 
 const SYSTEM_PROMPT = `You are an expert UK trades estimator with 20 years of experience pricing work across all trades — including builders, plumbers, electricians, plasterers, painters and decorators, tilers, joiners, roofers and landscapers.
 
-When given a job description, generate a conservative, realistic builder's quote in JSON format.
+When given a job description, generate a conservative, realistic trade quote in JSON format.
 
 IMPORTANT PRICING RULES:
 - Use CONSERVATIVE, MID-RANGE UK rates, not premium London rates
-- Labour: general builder 25-35 per hour, specialist trades (plumber/electrician) 35-45 per hour
-- Always price on the lower-to-mid end so builders can adjust upward if needed
+- Use trade-specific labour rates appropriate to the trade specified by the user:
+  * General Builder: 25-35/hr
+  * Bricklayer: 28-38/hr
+  * Groundworker: 25-35/hr
+  * Plasterer: 28-38/hr
+  * Plumber: 40-55/hr
+  * Electrician: 45-60/hr
+  * HVAC Engineer: 45-60/hr
+  * Roofer: 30-45/hr
+  * Joiner/Carpenter: 28-40/hr
+  * Tiler: 25-35/hr
+  * Painter & Decorator: 20-30/hr
+  * Landscaper: 20-30/hr
+- If the user specifies their trade, use that trade's rates for labour line items
+- Always price on the lower-to-mid end so tradesmen can adjust upward if needed
 - For small jobs (under 500), keep line items minimal and realistic
 - Do not add unnecessary line items to inflate the quote
 - Materials should reflect trade prices, not retail prices
@@ -15,7 +28,7 @@ IMPORTANT PRICING RULES:
 Return ONLY valid JSON with this exact structure, no other text before or after:
 {
   "jobTitle": "Brief job title",
-  "jobRef": "QB-4829",
+  "jobRef": "QB-XXXX",
   "summary": "2-3 sentence professional summary of the works",
   "lineItems": [
     { "category": "Labour", "description": "Detailed description", "unit": "hrs", "qty": 4, "rate": 35.00, "total": 140.00 }
@@ -24,7 +37,7 @@ Return ONLY valid JSON with this exact structure, no other text before or after:
   "vatRate": 20,
   "vatAmount": 28.00,
   "grandTotal": 168.00,
-  "notes": "Quote valid for 30 days. Rates are indicative - adjust to your local market. 50% deposit on acceptance. Balance due within 14 days of completion.",
+  "notes": "",
   "duration": "1 day"
 }
 
@@ -35,7 +48,25 @@ CRITICAL JSON RULES:
 - No apostrophes or single quotes inside any text values
 - No trailing commas after the last item in any array or object
 - All numeric fields must be plain numbers only
-- Keep description text simple, avoid special characters`;
+- Keep description text simple, avoid special characters
+- jobRef must be QB- followed by 4 random digits, e.g. QB-3847`;
+
+
+const TRADES = [
+  "General Builder",
+  "Bricklayer",
+  "Groundworker",
+  "Plasterer",
+  "Plumber",
+  "Electrician",
+  "HVAC Engineer",
+  "Roofer",
+  "Joiner / Carpenter",
+  "Tiler",
+  "Painter & Decorator",
+  "Landscaper",
+  "Other"
+];
 
 const DEFAULT_TERMS = "Quote valid for 30 days. Rates are indicative - adjust to your local market and supplier pricing. 50% deposit required on acceptance of quote. Balance due within 14 days of completion. All works carry a 12-month workmanship guarantee.";
 
@@ -369,7 +400,7 @@ Rules:
 - Do not use placeholders like [NAME] - use the actual names provided`;
 
     try {
-      const res = await fetch("/api/generate", {
+      const res = await fetch('/api/generate', {
         method:"POST",
         headers:{"content-type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:500,messages:[{role:"user",content:prompt}]})
@@ -885,6 +916,7 @@ export default function App() {
   const [defaultTerms, setDefaultTerms] = useState(saved.defaultTerms||DEFAULT_TERMS);
   const [labourRate, setLabourRate] = useState(saved.labourRate||"");
   const [vatRegistered, setVatRegistered] = useState(saved.vatRegistered !== false);
+  const [tradeType, setTradeType] = useState(saved.tradeType||"");
   const [jobDesc, setJobDesc] = useState("");
   const [clientInfo, setClientInfo] = useState({name:"",address:"",email:"",phone:""});
   const [quoteLabourRate, setQuoteLabourRate] = useState(saved.labourRate||"");
@@ -906,7 +938,7 @@ export default function App() {
 
   // Auto-save settings when company name or terms change
   useEffect(()=>{
-    saveSettings({companyName, defaultTerms, labourRate, vatRegistered});
+    saveSettings({companyName, defaultTerms, labourRate, vatRegistered, tradeType});
   },[companyName, defaultTerms, labourRate, vatRegistered]);
 
   const generate = async () => {
@@ -916,9 +948,10 @@ export default function App() {
       ? `Labour rate: GBP${quoteLabourRate} per hour - use this exact rate for ALL labour line items.\n${estimatedHours ? `Total labour hours for this job: ${estimatedHours} hours - use this exact figure for the total labour quantity.\n` : ""}`
       : "";
     const materialsLine = materialsHints ? `Specific materials or parts with known prices (use these exact figures):\n${materialsHints}\n` : "";
-    const msg = `${companyName?`Company: ${companyName}\n\n`:""}${labourLine}${materialsLine}Job Description: ${jobDesc}\n\nRespond with ONLY valid JSON.`;
+    const tradeLine = tradeType ? `Trade: ${tradeType}\n` : "";
+    const msg = `${companyName?`Company: ${companyName}\n\n`:""}${tradeLine}${labourLine}${materialsLine}Job Description: ${jobDesc}\n\nRespond with ONLY valid JSON.`;
     try {
-      const res = await fetch("/api/generate", {
+      const res = await fetch('/api/generate', {
         method:"POST",
         headers:{"content-type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:4000,system:SYSTEM_PROMPT,messages:[{role:"user",content:msg}]})
@@ -992,6 +1025,18 @@ export default function App() {
               <label style={lbl}>YOUR COMPANY NAME</label>
               <input value={companyName} onChange={e=>setCompanyName(e.target.value)} placeholder="e.g. ABC Construction Ltd" style={inp}/>
             </div>
+            <div style={{marginBottom:"14px"}}>
+              <label style={lbl}>YOUR TRADE</label>
+              <select
+                value={tradeType}
+                onChange={e=>{ setTradeType(e.target.value); saveSettings({companyName,defaultTerms,labourRate,vatRegistered,tradeType:e.target.value}); }}
+                style={{...inp, cursor:"pointer", appearance:"none", WebkitAppearance:"none", backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2360a5fa' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat:"no-repeat", backgroundPosition:"right 14px center", paddingRight:"36px", width:"280px"}}
+              >
+                <option value="" style={{background:"#0d1e35"}}>Select your trade...</option>
+                {TRADES.map(t=><option key={t} value={t} style={{background:"#0d1e35",color:"#f1f5f9"}}>{t}</option>)}
+              </select>
+            </div>
+
             <div style={{marginBottom:"14px"}}>
               <label style={lbl}>VAT REGISTERED</label>
               <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
@@ -1082,7 +1127,7 @@ export default function App() {
             </div>
 
             <button
-              onClick={()=>{ if(!companyName.trim()){ alert("Please enter your company name."); return; } saveSettings({companyName,defaultTerms}); setStep("form"); }}
+              onClick={()=>{ if(!companyName.trim()){ alert("Please enter your company name."); return; } if(!tradeType){ alert("Please select your trade."); return; } saveSettings({companyName,defaultTerms,tradeType}); setStep("form"); }}
               style={{width:"100%",background:"#3b82f6",border:"none",color:"#000",padding:"14px 24px",borderRadius:"8px",fontSize:"18px",fontWeight:800,letterSpacing:"0.04em",cursor:"pointer",marginBottom:"12px"}}>
               START GENERATING QUOTES →
             </button>
@@ -1121,7 +1166,13 @@ export default function App() {
             <h1 style={{fontSize:"clamp(28px,5vw,40px)",fontWeight:800,color:"#fff",margin:"0 0 8px 0",lineHeight:1.08,fontFamily:"'Outfit', sans-serif",letterSpacing:"-0.03em"}}>
               Professional quotes.<br/><span style={{background:"linear-gradient(135deg,#3b82f6 0%,#60a5fa 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>In 30 seconds.</span>
             </h1>
-            <p style={{color:"#cbd5e1",fontSize:"15px",margin:"0 0 24px 0",lineHeight:1.6}}>Describe the job, get a fully itemised quote with labour, materials and VAT.</p>
+            <p style={{color:"#cbd5e1",fontSize:"15px",margin:"0 0 16px 0",lineHeight:1.6}}>Describe the job, get a fully itemised quote with labour, materials and VAT.</p>
+            {tradeType&&(
+              <div style={{display:"inline-flex",alignItems:"center",gap:"8px",background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",borderRadius:"100px",padding:"5px 14px",fontSize:"12px",fontFamily:"'DM Mono', monospace",color:"#93c5fd",letterSpacing:"0.06em",marginBottom:"20px"}}>
+                <span style={{width:"6px",height:"6px",background:"#60a5fa",borderRadius:"50%",display:"inline-block"}}></span>
+                {tradeType.toUpperCase()}
+              </div>
+            )}
 
             <div style={{background:"rgba(11,25,46,0.95)",border:"1px solid rgba(96,165,250,0.18)",borderRadius:"12px",padding:"22px",marginBottom:"14px"}}>
               <label style={lbl}>DESCRIBE THE JOB *</label>
@@ -1140,7 +1191,7 @@ export default function App() {
                     <input
                       type="number"
                       value={quoteLabourRate}
-                      onChange={e=>{ setQuoteLabourRate(e.target.value); if(e.target.value) { setLabourRate(e.target.value); saveSettings({companyName,defaultTerms,labourRate:e.target.value}); } }}
+                      onChange={e=>{ setQuoteLabourRate(e.target.value); if(e.target.value) { setLabourRate(e.target.value); saveSettings({companyName,defaultTerms,labourRate:e.target.value,tradeType}); } }}
                       placeholder="e.g. 45"
                       style={{...inp, width:"100px", fontFamily:"monospace", fontSize:"15px", fontWeight:600}}
                     />
@@ -1227,7 +1278,7 @@ export default function App() {
             historyId={currentHistoryId}
             jobDesc={jobDesc}
             onQuoteChange={(updatedQuote)=>setQuote(updatedQuote)}
-            onSaveTerms={(terms)=>{ setDefaultTerms(terms); saveSettings({companyName, defaultTerms:terms, labourRate, vatRegistered}); }}
+            onSaveTerms={(terms)=>{ setDefaultTerms(terms); saveSettings({companyName, defaultTerms:terms, labourRate, vatRegistered, tradeType}); }}
             onReset={reset}
           />
         )}
