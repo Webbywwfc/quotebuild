@@ -1105,6 +1105,21 @@ export default function App() {
               </div>
             </div>
 
+            <div style={{background:"rgba(11,25,46,0.95)",border:"1px solid rgba(96,165,250,0.18)",borderRadius:"12px",padding:"22px",marginBottom:"14px"}}>
+              <label style={lbl}>YOUR TRADE *</label>
+              <select
+                value={tradeType}
+                onChange={e=>setTradeType(e.target.value)}
+                style={{...inp, cursor:"pointer", appearance:"none", WebkitAppearance:"none", backgroundImage:`url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2360a5fa' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat:"no-repeat", backgroundPosition:"right 14px center", paddingRight:"36px"}}
+              >
+                <option value="" disabled style={{background:"#0d1e35"}}>Select your trade...</option>
+                {TRADES.map(t=><option key={t} value={t} style={{background:"#0d1e35",color:"#f1f5f9"}}>{t}</option>)}
+              </select>
+              <div style={{color:"#94a3b8",fontSize:"11px",fontFamily:"'DM Mono', monospace",marginTop:"8px"}}>
+                Used to generate accurate labour rates for your trade.
+              </div>
+            </div>
+
             {/* How it works — shown once on setup only */}
             <div style={{background:"rgba(11,25,46,0.95)",border:"1px solid rgba(96,165,250,0.18)",borderRadius:"12px",padding:"22px",marginBottom:"14px"}}>
               <div style={{color:"#3b82f6",fontSize:"11px",fontFamily:"monospace",letterSpacing:"0.1em",marginBottom:"14px"}}>✦ HOW BRIEFQUOTE WORKS</div>
