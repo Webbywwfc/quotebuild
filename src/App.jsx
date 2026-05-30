@@ -126,6 +126,35 @@ const css = `
 
 const STORAGE_KEY = "briefquote_settings";
 const HISTORY_KEY = "briefquote_history";
+const QUOTE_COUNT_KEY = "briefquote_quote_count";
+const EMAIL_KEY = "briefquote_email";
+const PRO_KEY = "briefquote_pro";
+const FREE_LIMIT = 3;
+const STRIPE_URL = "https://buy.stripe.com/7sYeVd8kO0xp3EK5qF48000";
+
+function getQuoteCount() {
+  try { return parseInt(localStorage.getItem(QUOTE_COUNT_KEY)||"0",10); } catch { return 0; }
+}
+function incrementQuoteCount() {
+  try { localStorage.setItem(QUOTE_COUNT_KEY, String(getQuoteCount()+1)); } catch {}
+}
+function getSavedEmail() {
+  try { return localStorage.getItem(EMAIL_KEY)||""; } catch { return ""; }
+}
+function saveEmail(email) {
+  try { localStorage.setItem(EMAIL_KEY, email.toLowerCase().trim()); } catch {}
+}
+async function checkProStatus(email) {
+  try {
+    const res = await fetch('/api/check-pro', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email: email.toLowerCase().trim()})
+    });
+    const data = await res.json();
+    return data.isPro === true;
+  } catch { return false; }
+}
 
 function loadSettings() {
   try {
@@ -985,6 +1014,95 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
   );
 }
 
+function PaywallModal({ onClose, onUnlock, userEmail }) {
+  const [email, setEmail] = useState(userEmail||"");
+  const [checking, setChecking] = useState(false);
+  const [error, setError] = useState("");
+  const mo = {fontFamily:"'DM Mono', monospace"};
+
+  const handleCheck = async () => {
+    if (!email.trim() || !email.includes('@')) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    setChecking(true);
+    setError("");
+    const isPro = await checkProStatus(email);
+    setChecking(false);
+    if (isPro) {
+      saveEmail(email);
+      onUnlock();
+    } else {
+      setError("No active subscription found for this email. Please subscribe first or check your email is correct.");
+    }
+  };
+
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}}>
+      <div style={{background:"linear-gradient(135deg,#0d1e35,#091424)",border:"1px solid rgba(37,99,235,0.4)",borderRadius:"16px",padding:"32px",maxWidth:"420px",width:"100%",boxShadow:"0 0 60px rgba(37,99,235,0.2)"}}>
+        <div style={{textAlign:"center",marginBottom:"24px"}}>
+          <div style={{width:"48px",height:"48px",background:"linear-gradient(135deg,#2563eb,#60a5fa)",borderRadius:"12px",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",boxShadow:"0 0 20px rgba(37,99,235,0.4)"}}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 12H15M9 8H15M9 16H12M5 20H19C20.1 20 21 19.1 21 18V6C21 4.9 20.1 4 19 4H5C3.9 4 3 4.9 3 6V18C3 19.1 3.9 20 5 20Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </div>
+          <div style={{display:"inline-flex",alignItems:"center",gap:"6px",background:"rgba(37,99,235,0.12)",border:"1px solid rgba(37,99,235,0.3)",borderRadius:"100px",padding:"4px 12px",fontSize:"11px",...mo,color:"#93c5fd",letterSpacing:"0.06em",marginBottom:"12px"}}>
+            <span style={{width:"5px",height:"5px",background:"#60a5fa",borderRadius:"50%",display:"inline-block"}}></span>
+            FREE QUOTES USED
+          </div>
+          <h2 style={{fontSize:"24px",fontWeight:800,color:"#fff",margin:"0 0 8px",fontFamily:"'Outfit', sans-serif",letterSpacing:"-0.02em"}}>Upgrade to Pro</h2>
+          <p style={{color:"#94a3b8",fontSize:"14px",margin:0,lineHeight:1.6}}>You have used your 3 free quotes. Upgrade to generate unlimited quotes.</p>
+        </div>
+
+        <div style={{background:"rgba(37,99,235,0.08)",border:"1px solid rgba(37,99,235,0.2)",borderRadius:"12px",padding:"20px",marginBottom:"20px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}}>
+            <span style={{color:"#fff",fontWeight:700,fontSize:"16px",fontFamily:"'Outfit', sans-serif"}}>BriefQuote Pro</span>
+            <span style={{color:"#60a5fa",fontWeight:800,fontSize:"22px",fontFamily:"'Outfit', sans-serif"}}>£14.99<span style={{fontSize:"13px",fontWeight:400,color:"#94a3b8"}}>/mo</span></span>
+          </div>
+          {[
+            "Unlimited quote generation",
+            "All trades & accurate UK rates",
+            "PDF export & cover emails",
+            "Quote history & status tracking",
+            "VAT toggle & CIS support (coming soon)",
+          ].map((f,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"10px"}}>
+              <span style={{color:"#60a5fa",fontSize:"13px",fontWeight:700,flexShrink:0}}>✓</span>
+              <span style={{color:"#cbd5e1",fontSize:"13px"}}>{f}</span>
+            </div>
+          ))}
+        </div>
+
+        <a href={STRIPE_URL} target="_blank" rel="noreferrer"
+          style={{display:"block",width:"100%",background:"#2563eb",border:"none",color:"#fff",padding:"14px",borderRadius:"10px",fontSize:"16px",fontWeight:700,letterSpacing:"0.04em",cursor:"pointer",textAlign:"center",textDecoration:"none",boxShadow:"0 0 30px rgba(37,99,235,0.35)",fontFamily:"'Outfit', sans-serif",marginBottom:"16px"}}>
+          UPGRADE NOW — £14.99/MONTH →
+        </a>
+
+        <div style={{borderTop:"1px solid rgba(37,99,235,0.15)",paddingTop:"16px"}}>
+          <div style={{color:"#6b7280",fontSize:"11px",...mo,marginBottom:"8px",textAlign:"center"}}>ALREADY SUBSCRIBED? ENTER YOUR EMAIL TO UNLOCK</div>
+          <div style={{display:"flex",gap:"8px"}}>
+            <input
+              value={email}
+              onChange={e=>{setEmail(e.target.value);setError("");}}
+              placeholder="your@email.com"
+              type="email"
+              style={{flex:1,background:"#112540",border:"1px solid rgba(96,165,250,0.2)",borderRadius:"8px",padding:"10px 12px",color:"#f1f5f9",fontSize:"13px",...mo}}
+            />
+            <button onClick={handleCheck} disabled={checking}
+              style={{background:"#112540",border:"1px solid rgba(96,165,250,0.3)",color:"#60a5fa",borderRadius:"8px",padding:"10px 14px",fontSize:"12px",cursor:"pointer",...mo,fontWeight:700,whiteSpace:"nowrap"}}>
+              {checking?"...":"UNLOCK"}
+            </button>
+          </div>
+          {error&&<div style={{color:"#f87171",fontSize:"11px",...mo,marginTop:"6px"}}>{error}</div>}
+        </div>
+
+        <button onClick={onClose}
+          style={{display:"block",width:"100%",background:"transparent",border:"none",color:"#4b5563",fontSize:"12px",cursor:"pointer",marginTop:"16px",...mo,textAlign:"center"}}>
+          ← BACK
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const saved = loadSettings();
   const isFirstTime = !saved.companyName;
@@ -994,6 +1112,11 @@ export default function App() {
   const [labourRate, setLabourRate] = useState(saved.labourRate||"");
   const [vatRegistered, setVatRegistered] = useState(saved.vatRegistered !== false);
   const [tradeType, setTradeType] = useState(saved.tradeType||"");
+  const [quoteCount, setQuoteCount] = useState(getQuoteCount());
+  const [proUnlocked, setProUnlocked] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [userEmail, setUserEmail] = useState(getSavedEmail());
+  const [checkingPro, setCheckingPro] = useState(false);
   const [jobDesc, setJobDesc] = useState("");
   const [clientInfo, setClientInfo] = useState({name:"",address:"",email:"",phone:""});
   const [quoteLabourRate, setQuoteLabourRate] = useState(saved.labourRate||"");
@@ -1013,6 +1136,18 @@ export default function App() {
     document.head.appendChild(s);
   },[]);
 
+  // Check pro status on load if email already saved
+  useEffect(()=>{
+    const savedEmail = getSavedEmail();
+    if (savedEmail) {
+      setCheckingPro(true);
+      checkProStatus(savedEmail).then(isPro => {
+        setProUnlocked(isPro);
+        setCheckingPro(false);
+      });
+    }
+  }, []);
+
   // Auto-save settings when company name or terms change
   useEffect(()=>{
     saveSettings({companyName, defaultTerms, labourRate, vatRegistered, tradeType});
@@ -1020,6 +1155,10 @@ export default function App() {
 
   const generate = async () => {
     if (jobDesc.trim().length < 15) return;
+    if (!proUnlocked && quoteCount >= FREE_LIMIT) {
+      setShowPaywall(true);
+      return;
+    }
     setStep("loading"); setErrorMsg("");
     const labourLine = quoteLabourRate
       ? `Labour rate: GBP${quoteLabourRate} per hour - use this exact rate for ALL labour line items.\n${estimatedHours ? `Total labour hours for this job: ${estimatedHours} hours - use this exact figure for the total labour quantity.\n` : ""}`
@@ -1050,6 +1189,8 @@ export default function App() {
         setCurrentHistoryId(histEntry ? histEntry.id : null);
         setQuote(parsed);
         setStep("result");
+        incrementQuoteCount();
+        setQuoteCount(getQuoteCount());
       } catch(parseErr) {
         setErrorMsg("Parse error: " + parseErr.message + " | Snippet: " + jsonStr.slice(0,200));
         setStep("error");
@@ -1067,6 +1208,7 @@ export default function App() {
 
   return (
     <div style={{minHeight:"100vh",background:"#050d1a",color:"#e5e7eb",fontFamily:"'DM Sans', sans-serif"}}>
+      {showPaywall&&<PaywallModal onClose={()=>setShowPaywall(false)} onUnlock={()=>{ setProUnlocked(true); setShowPaywall(false); }} userEmail={userEmail}/>}
       {/* Header */}
       <div className="no-print" style={{borderBottom:"1px solid rgba(255,255,255,0.06)",background:"rgba(5,13,26,0.85)",backdropFilter:"blur(12px)",padding:"0 20px",position:"sticky",top:0,zIndex:100}}>
         <div style={{maxWidth:"740px",margin:"0 auto",padding:"14px 0",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -1102,6 +1244,24 @@ export default function App() {
               <label style={lbl}>YOUR COMPANY NAME</label>
               <input value={companyName} onChange={e=>setCompanyName(e.target.value)} placeholder="e.g. ABC Construction Ltd" style={inp}/>
             </div>
+            <div style={{marginBottom:"14px"}}>
+              <label style={lbl}>YOUR EMAIL</label>
+              <div style={{display:"flex",gap:"8px"}}>
+                <input
+                  type="email"
+                  value={userEmail}
+                  onChange={e=>setUserEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  style={{...inp,width:"280px"}}
+                />
+                <button onClick={async()=>{ if(!userEmail.includes('@')) return; saveEmail(userEmail); setCheckingPro(true); const isPro = await checkProStatus(userEmail); setProUnlocked(isPro); setCheckingPro(false); alert(isPro?'Pro access confirmed!':'No active subscription found for this email.'); }}
+                  style={{background:"#112540",border:"1px solid rgba(96,165,250,0.3)",color:"#60a5fa",borderRadius:"8px",padding:"8px 12px",fontSize:"11px",cursor:"pointer",fontFamily:"'DM Mono', monospace",whiteSpace:"nowrap"}}>
+                  {checkingPro?"...":"CHECK"}
+                </button>
+              </div>
+              <div style={{color:"#94a3b8",fontSize:"11px",fontFamily:"'DM Mono', monospace",marginTop:"6px"}}>Used to restore Pro access. {proUnlocked&&<span style={{color:"#60a5fa"}}>✓ Pro active</span>}</div>
+            </div>
+
             <div style={{marginBottom:"14px"}}>
               <label style={lbl}>YOUR TRADE</label>
               <select
@@ -1179,6 +1339,20 @@ export default function App() {
               />
               <div style={{color:"#94a3b8",fontSize:"11px",fontFamily:"monospace",marginTop:"8px"}}>
                 This will appear on all your quotes. You can change it anytime in Settings.
+              </div>
+            </div>
+
+            <div style={{background:"rgba(11,25,46,0.95)",border:"1px solid rgba(96,165,250,0.18)",borderRadius:"12px",padding:"22px",marginBottom:"14px"}}>
+              <label style={lbl}>YOUR EMAIL *</label>
+              <input
+                type="email"
+                value={userEmail}
+                onChange={e=>setUserEmail(e.target.value)}
+                placeholder="your@email.com"
+                style={inp}
+              />
+              <div style={{color:"#94a3b8",fontSize:"11px",fontFamily:"'DM Mono', monospace",marginTop:"8px"}}>
+                Used to restore your Pro access on any device.
               </div>
             </div>
 
@@ -1351,9 +1525,20 @@ export default function App() {
               ))}
             </div>
 
+            {!proUnlocked&&(
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}}>
+                <span style={{color:"#6b7280",fontSize:"11px",fontFamily:"'DM Mono', monospace"}}>FREE QUOTES USED</span>
+                <div style={{display:"flex",gap:"4px"}}>
+                  {[0,1,2].map(i=>(
+                    <div key={i} style={{width:"24px",height:"6px",borderRadius:"3px",background:i<quoteCount?"#2563eb":"#1e3a5f",transition:"background 0.3s"}}/>
+                  ))}
+                  <span style={{color:quoteCount>=FREE_LIMIT?"#f87171":"#60a5fa",fontSize:"11px",fontFamily:"'DM Mono', monospace",marginLeft:"6px"}}>{quoteCount}/{FREE_LIMIT}</span>
+                </div>
+              </div>
+            )}
             <button onClick={generate} disabled={jobDesc.trim().length<15} className={jobDesc.trim().length>=15?"btn-glow":""}
               style={{width:"100%",background:jobDesc.trim().length>=15?"#2563eb":"#112540",border:"none",color:jobDesc.trim().length>=15?"#fff":"#4b5563",padding:"14px 24px",borderRadius:"10px",fontSize:"16px",fontWeight:700,letterSpacing:"0.06em",cursor:jobDesc.trim().length>=15?"pointer":"not-allowed",transition:"all 0.2s",fontFamily:"'Outfit', sans-serif",boxShadow:jobDesc.trim().length>=15?"0 0 30px rgba(37,99,235,0.3)":"none"}}>
-              GENERATE QUOTE →
+              {!proUnlocked && quoteCount>=FREE_LIMIT ? "UNLOCK UNLIMITED QUOTES →" : "GENERATE QUOTE →"}
             </button>
           </div>
         )}
