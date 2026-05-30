@@ -20,6 +20,7 @@ IMPORTANT PRICING RULES:
   * Painter & Decorator: 20-30/hr
   * Landscaper: 20-30/hr
 - If the user specifies their trade, use that trade's rates for labour line items
+- If the trade is "Other / Multi-Trade", use the most appropriate rates for the specific work described in the job description
 - Always price on the lower-to-mid end so tradesmen can adjust upward if needed
 - For small jobs (under 500), keep line items minimal and realistic
 - Do not add unnecessary line items to inflate the quote
@@ -65,7 +66,7 @@ const TRADES = [
   "Tiler",
   "Painter & Decorator",
   "Landscaper",
-  "Other"
+  "Other / Multi-Trade"
 ];
 
 const DEFAULT_TERMS = "Quote valid for 30 days. Rates are indicative - adjust to your local market and supplier pricing. 50% deposit required on acceptance of quote. Balance due within 14 days of completion. All works carry a 12-month workmanship guarantee.";
