@@ -726,12 +726,23 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
       {/* Header */}
       <div style={{background:"linear-gradient(135deg,#0d1e35,#091424)",border:"1px solid rgba(37,99,235,0.2)",borderTop:"3px solid #2563eb",borderRadius:"8px",padding:"22px",marginBottom:"14px"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:"12px"}}>
-          <div>
+          <div style={{flex:1,minWidth:0}}>
             {companyName&&<div style={{color:"#fff",fontSize:"16px",fontWeight:700,marginBottom:"4px"}}>{companyName}</div>}
-            <div style={{...am,...mo,fontSize:"12px",marginBottom:"5px"}}>QUOTE {q.jobRef}</div>
-            <h2 style={{fontSize:"20px",fontWeight:700,color:"#fff",margin:0,fontFamily:"'Outfit', sans-serif",letterSpacing:"-0.01em"}}>{q.jobTitle}</h2>
+            <div style={{display:"flex",alignItems:"center",gap:"6px",marginBottom:"8px"}}>
+              <span style={{...am,...mo,fontSize:"11px",flexShrink:0}}>QUOTE</span>
+              <input value={q.jobRef} onChange={e=>{ const u={...q,jobRef:e.target.value}; setQ(u); autoSave(u); }}
+                style={{background:"transparent",border:"none",borderBottom:"1px dashed rgba(96,165,250,0.2)",color:"#60a5fa",fontSize:"11px",...mo,width:"80px",padding:"1px 2px"}}
+                onFocus={e=>e.target.style.borderBottomColor="rgba(96,165,250,0.7)"}
+                onBlur={e=>e.target.style.borderBottomColor="rgba(96,165,250,0.2)"}
+              />
+            </div>
+            <input value={q.jobTitle} onChange={e=>{ const u={...q,jobTitle:e.target.value}; setQ(u); autoSave(u); }}
+              style={{background:"transparent",border:"none",borderBottom:"1px dashed rgba(96,165,250,0.2)",color:"#fff",fontSize:"20px",fontWeight:700,fontFamily:"'Outfit', sans-serif",letterSpacing:"-0.01em",width:"100%",padding:"2px 0"}}
+              onFocus={e=>e.target.style.borderBottomColor="rgba(96,165,250,0.7)"}
+              onBlur={e=>e.target.style.borderBottomColor="rgba(96,165,250,0.2)"}
+            />
           </div>
-          <div style={{textAlign:"right"}}>
+          <div style={{textAlign:"right",flexShrink:0}}>
             <div style={{color:"#6b7280",fontSize:"10px",...mo,marginBottom:"3px"}}>TOTAL INC. VAT</div>
             <div style={{fontSize:"30px",fontWeight:800,...am,fontFamily:"'Outfit', sans-serif",letterSpacing:"-0.02em"}}>£{Number(q.grandTotal).toLocaleString("en-GB",{minimumFractionDigits:2})}</div>
             <div style={{color:"#6b7280",fontSize:"11px",...mo,marginTop:"4px"}}>📅 {new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase()}</div>
@@ -756,7 +767,17 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
           onBlur={e=>{e.target.style.borderBottomColor="rgba(96,165,250,0.2)"; e.target.style.color="#9ca3af";}}
           rows={3}
         />
-        <div style={{color:"#6b7280",fontSize:"11px",...mo,marginTop:"8px"}}>⏱ EST. {q.duration.toUpperCase()}</div>
+        <div style={{display:"flex",alignItems:"center",gap:"6px",marginTop:"10px"}}>
+          <span style={{color:"#6b7280",fontSize:"11px",...mo}}>⏱ EST.</span>
+          <input value={q.duration} onChange={e=>{ const u={...q,duration:e.target.value}; setQ(u); autoSave(u); }}
+            style={{background:"transparent",border:"none",borderBottom:"1px dashed rgba(96,165,250,0.2)",color:"#6b7280",fontSize:"11px",...mo,width:"120px",padding:"1px 2px",textTransform:"uppercase"}}
+            onFocus={e=>{e.target.style.borderBottomColor="rgba(96,165,250,0.7)"; e.target.style.color="#93c5fd";}}
+            onBlur={e=>{e.target.style.borderBottomColor="rgba(96,165,250,0.2)"; e.target.style.color="#6b7280";}}
+          />
+        </div>
+        <div className="no-print" style={{marginTop:"10px",fontSize:"10px",color:"#2563eb",...mo,letterSpacing:"0.06em"}}>
+          ✎ TAP ANY FIELD ABOVE TO EDIT
+        </div>
       </div>
 
       {/* Line items */}
