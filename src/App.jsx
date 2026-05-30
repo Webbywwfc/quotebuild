@@ -112,6 +112,10 @@ const css = `
   input:focus, textarea:focus { border-color: rgba(96,165,250,0.7) !important; box-shadow: 0 0 0 3px rgba(37,99,235,0.15) !important; background: #1e3a5f !important; }
   input::placeholder, textarea::placeholder { color: #64748b !important; }
   select:focus { border-color: rgba(96,165,250,0.7) !important; }
+  @media (max-width: 600px) {
+    .line-items-grid { grid-template-columns: 1fr 36px 44px 60px 60px 20px !important; font-size: 11px !important; }
+    .line-items-grid input { font-size: 11px !important; }
+  }
 `;
 
 const STORAGE_KEY = "briefquote_settings";
@@ -761,7 +765,7 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
               </button>
             </div>
             {q.lineItems.map((item,ii)=>item.category!==cat?null:(
-              <div key={ii} style={{display:"grid",gridTemplateColumns:"1fr 48px 60px 70px 70px 24px",padding:"9px 14px",borderBottom:"1px solid rgba(37,99,235,0.1)",alignItems:"center",gap:"4px"}}>
+              <div key={ii} className="line-items-grid" style={{display:"grid",gridTemplateColumns:"1fr 48px 60px 70px 70px 24px",padding:"9px 14px",borderBottom:"1px solid rgba(37,99,235,0.1)",alignItems:"center",gap:"4px"}}>
                 <input value={item.description} onChange={e=>updateDesc(ii,e.target.value)}
                   style={{background:"transparent",border:"none",borderBottom:"1px dashed #2a2a2a",color:"#e5e7eb",fontSize:"13px",padding:"2px 4px",fontFamily:"sans-serif",width:"100%"}}
                   onFocus={e=>e.target.style.borderBottomColor="#3b82f6"}
