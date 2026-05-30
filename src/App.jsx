@@ -40,12 +40,47 @@ CRITICAL JSON RULES:
 const DEFAULT_TERMS = "Quote valid for 30 days. Rates are indicative - adjust to your local market and supplier pricing. 50% deposit required on acceptance of quote. Balance due within 14 days of completion. All works carry a 12-month workmanship guarantee.";
 
 const css = `
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
   @keyframes spin { to { transform:rotate(360deg); } }
   @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pulse { 0%, 100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.8); } }
   * { box-sizing:border-box; }
+  body {
+    background: #050d1a;
+    font-family: 'DM Sans', sans-serif;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% -10%, rgba(37,99,235,0.14) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 110%, rgba(37,99,235,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(37,99,235,0.03) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(37,99,235,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(37,99,235,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  #root { position: relative; z-index: 1; }
   input, textarea { outline:none !important; }
+  input::placeholder, textarea::placeholder { color: #4b5563; }
   .no-print {}
   @media print { .no-print { display:none !important; } body { margin:0; } }
+  .btn-glow:hover { box-shadow: 0 0 24px rgba(37,99,235,0.5) !important; transform: translateY(-1px); }
+  .card-hover:hover { border-color: rgba(37,99,235,0.35) !important; transform: translateY(-1px); }
+  input:focus, textarea:focus { border-color: rgba(96,165,250,0.7) !important; box-shadow: 0 0 0 3px rgba(37,99,235,0.15) !important; background: #1e3a5f !important; }
+  input::placeholder, textarea::placeholder { color: #64748b !important; }
+  select:focus { border-color: rgba(96,165,250,0.7) !important; }
 `;
 
 const STORAGE_KEY = "briefquote_settings";
@@ -130,7 +165,7 @@ function duplicateInHistory(id) {
 }
 
 const STATUS_CONFIG = {
-  draft:    { label:"DRAFT",    bg:"#1a1a1a", border:"#3a3a3a", color:"#6b7280" },
+  draft:    { label:"DRAFT",    bg:"#091424", border:"rgba(37,99,235,0.2)", color:"#6b7280" },
   sent:     { label:"SENT",     bg:"#0c1a2e", border:"#1e3a5f", color:"#60a5fa" },
   accepted: { label:"ACCEPTED", bg:"#0a1f0a", border:"#166534", color:"#4ade80" },
   declined: { label:"DECLINED", bg:"#1f0a0a", border:"#7f1d1d", color:"#f87171" },
@@ -139,7 +174,7 @@ const STATUS_CONFIG = {
 function StatusBadge({ status, onChange }) {
   const [open, setOpen] = useState(false);
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.draft;
-  const mo = {fontFamily:"monospace"};
+  const mo = {fontFamily:"'DM Mono', monospace"};
 
   return (
     <div style={{position:"relative"}}>
@@ -149,10 +184,10 @@ function StatusBadge({ status, onChange }) {
         {cfg.label} ▾
       </button>
       {open&&(
-        <div style={{position:"absolute",top:"100%",right:0,marginTop:"4px",background:"#111",border:"1px solid #2a2a2a",borderRadius:"6px",overflow:"hidden",zIndex:100,minWidth:"120px"}}>
+        <div style={{position:"absolute",top:"100%",right:0,marginTop:"4px",background:"#0d1e35",border:"1px solid rgba(37,99,235,0.2)",borderRadius:"6px",overflow:"hidden",zIndex:100,minWidth:"120px"}}>
           {Object.entries(STATUS_CONFIG).map(([key, c])=>(
             <button key={key} onClick={e=>{ e.stopPropagation(); onChange(key); setOpen(false); }}
-              style={{display:"block",width:"100%",background:status===key?"#1a1a1a":"transparent",border:"none",borderBottom:"1px solid #1a1a1a",color:c.color,padding:"8px 12px",fontSize:"11px",cursor:"pointer",...mo,fontWeight:700,textAlign:"left",letterSpacing:"0.06em"}}>
+              style={{display:"block",width:"100%",background:status===key?"#112540":"transparent",border:"none",borderBottom:"1px solid rgba(37,99,235,0.1)",color:c.color,padding:"8px 12px",fontSize:"11px",cursor:"pointer",...mo,fontWeight:700,textAlign:"left",letterSpacing:"0.06em"}}>
               {c.label}
             </button>
           ))}
@@ -182,17 +217,17 @@ function HistoryPanel({ onLoad, onDuplicate, onClose }) {
   };
 
 
-  const mo = {fontFamily:"monospace"};
-  const am = {color:"#f59e0b"};
+  const mo = {fontFamily:"'DM Mono', monospace"};
+  const am = {color:"#60a5fa"};
 
 
   if (history.length === 0) return (
     <div style={{animation:"fadeUp 0.3s ease forwards"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"20px"}}>
-        <h2 style={{margin:0,fontSize:"22px",fontWeight:700,color:"#fff"}}>Quote History</h2>
-        <button onClick={onClose} style={{background:"transparent",border:"1px solid #2a2a2a",color:"#6b7280",padding:"6px 12px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}>← BACK</button>
+        <h2 style={{margin:0,fontSize:"22px",fontWeight:800,color:"#fff",fontFamily:"'Outfit', sans-serif",letterSpacing:"-0.02em"}}>Quote History</h2>
+        <button onClick={onClose} style={{background:"transparent",border:"1px solid rgba(37,99,235,0.2)",color:"#6b7280",padding:"6px 12px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}>← BACK</button>
       </div>
-      <div style={{background:"#0f0f0f",border:"1px solid #1f1f1f",borderRadius:"10px",padding:"40px",textAlign:"center"}}>
+      <div style={{background:"#091424",border:"1px solid rgba(37,99,235,0.15)",borderRadius:"10px",padding:"40px",textAlign:"center"}}>
         <div style={{fontSize:"32px",marginBottom:"12px"}}>📋</div>
         <p style={{color:"#6b7280",margin:0,fontSize:"14px"}}>No quotes saved yet. Generate your first quote and it will appear here.</p>
       </div>
@@ -208,10 +243,10 @@ function HistoryPanel({ onLoad, onDuplicate, onClose }) {
       {/* Header */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}}>
         <div>
-          <h2 style={{margin:"0 0 2px 0",fontSize:"22px",fontWeight:700,color:"#fff"}}>Quote History</h2>
+          <h2 style={{margin:"0 0 2px 0",fontSize:"22px",fontWeight:800,color:"#fff",fontFamily:"'Outfit', sans-serif",letterSpacing:"-0.02em"}}>Quote History</h2>
           <p style={{margin:0,color:"#6b7280",fontSize:"13px",...mo}}>{history.length} QUOTE{history.length!==1?"S":""} SAVED</p>
         </div>
-        <button onClick={onClose} style={{background:"transparent",border:"1px solid #2a2a2a",color:"#6b7280",padding:"6px 12px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}>← BACK</button>
+        <button onClick={onClose} style={{background:"transparent",border:"1px solid rgba(37,99,235,0.2)",color:"#6b7280",padding:"6px 12px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}>← BACK</button>
       </div>
 
       {/* Filter tabs */}
@@ -221,7 +256,7 @@ function HistoryPanel({ onLoad, onDuplicate, onClose }) {
           const active = filterStatus===key;
           return (
             <button key={key} onClick={()=>setFilterStatus(key)}
-              style={{background:active?(cfg?cfg.bg:"#1a1a1a"):"transparent", border:`1px solid ${active?(cfg?cfg.border:"#f59e0b"):"#2a2a2a"}`, color:active?(cfg?cfg.color:"#f59e0b"):"#6b7280", borderRadius:"20px", padding:"4px 12px", fontSize:"11px", cursor:"pointer", ...mo, fontWeight:active?700:400}}>
+              style={{background:active?(cfg?cfg.bg:"#112540"):"transparent", border:`1px solid ${active?(cfg?cfg.border:"#3b82f6"):"#2a2a2a"}`, color:active?(cfg?cfg.color:"#3b82f6"):"#6b7280", borderRadius:"20px", padding:"4px 12px", fontSize:"11px", cursor:"pointer", ...mo, fontWeight:active?700:400}}>
               {label} {counts[key]>0?`(${counts[key]})`:""}
             </button>
           );
@@ -231,21 +266,21 @@ function HistoryPanel({ onLoad, onDuplicate, onClose }) {
       {/* Quote cards */}
       <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
         {filtered.length===0&&(
-          <div style={{background:"#0f0f0f",border:"1px solid #1f1f1f",borderRadius:"10px",padding:"32px",textAlign:"center"}}>
+          <div style={{background:"#091424",border:"1px solid rgba(37,99,235,0.15)",borderRadius:"10px",padding:"32px",textAlign:"center"}}>
             <p style={{color:"#6b7280",margin:0,fontSize:"14px"}}>No {filterStatus} quotes yet.</p>
           </div>
         )}
         {filtered.map((entry) => {
           const cfg = STATUS_CONFIG[entry.status||"draft"];
           return (
-            <div key={entry.id} style={{background:"#0f0f0f",border:"1px solid #1f1f1f",borderRadius:"10px",padding:"16px 18px",transition:"border-color 0.15s"}}
-              onMouseEnter={e=>e.currentTarget.style.borderColor="#2a2a2a"}
+            <div key={entry.id} style={{background:"#091424",border:"1px solid rgba(37,99,235,0.15)",borderRadius:"10px",padding:"16px 18px",transition:"border-color 0.15s"}}
+              onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(37,99,235,0.2)"}
               onMouseLeave={e=>e.currentTarget.style.borderColor="#1f1f1f"}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"12px"}}>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"6px",flexWrap:"wrap"}}>
                     <span style={{...am,...mo,fontSize:"11px"}}>{entry.quote.jobRef}</span>
-                    <span style={{color:"#374151",fontSize:"11px",...mo}}>
+                    <span style={{color:"#6b7280",fontSize:"11px",...mo}}>
                       {new Date(entry.savedAt).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}
                     </span>
                     <StatusBadge
@@ -264,7 +299,7 @@ function HistoryPanel({ onLoad, onDuplicate, onClose }) {
                   </div>
                   {(entry.status==="draft"||!entry.status)&&(
                     <div style={{display:"flex",alignItems:"center",gap:"6px",marginTop:"6px"}}>
-                      <span style={{color:"#f59e0b",fontSize:"10px"}}>↑</span>
+                      <span style={{color:"#3b82f6",fontSize:"10px"}}>↑</span>
                       <span style={{color:"#4b5563",fontSize:"11px",fontFamily:"monospace"}}>Update status above when sent to client</span>
                     </div>
                   )}
@@ -275,21 +310,21 @@ function HistoryPanel({ onLoad, onDuplicate, onClose }) {
                   </div>
                   <div style={{display:"flex",gap:"6px",justifyContent:"flex-end",flexWrap:"wrap"}}>
                     <button onClick={()=>onLoad(entry)}
-                      style={{background:"#f59e0b",border:"none",color:"#000",padding:"6px 12px",borderRadius:"6px",...mo,fontSize:"11px",fontWeight:700,cursor:"pointer"}}>
+                      style={{background:"#3b82f6",border:"none",color:"#000",padding:"6px 12px",borderRadius:"6px",...mo,fontSize:"11px",fontWeight:700,cursor:"pointer"}}>
                       OPEN
                     </button>
                     <button onClick={()=>handleDuplicate(entry.id)}
                       title="Duplicate this quote"
-                      style={{background:"transparent",border:"1px solid #2a2a2a",color:"#9ca3af",padding:"6px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}
-                      onMouseEnter={e=>{e.currentTarget.style.borderColor="#f59e0b44";e.currentTarget.style.color="#f59e0b";}}
-                      onMouseLeave={e=>{e.currentTarget.style.borderColor="#2a2a2a";e.currentTarget.style.color="#9ca3af";}}>
+                      style={{background:"transparent",border:"1px solid rgba(37,99,235,0.2)",color:"#9ca3af",padding:"6px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}
+                      onMouseEnter={e=>{e.currentTarget.style.borderColor="#2563eb44";e.currentTarget.style.color="#3b82f6";}}
+                      onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(37,99,235,0.2)";e.currentTarget.style.color="#9ca3af";}}>
                       ⧉
                     </button>
                     <button onClick={()=>handleDelete(entry.id)}
                       title="Delete this quote"
-                      style={{background:"transparent",border:"1px solid #2a2a2a",color:"#4b5563",padding:"6px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}
+                      style={{background:"transparent",border:"1px solid rgba(37,99,235,0.2)",color:"#4b5563",padding:"6px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}
                       onMouseEnter={e=>{e.currentTarget.style.borderColor="#7f1d1d";e.currentTarget.style.color="#ef4444";}}
-                      onMouseLeave={e=>{e.currentTarget.style.borderColor="#2a2a2a";e.currentTarget.style.color="#4b5563";}}>
+                      onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(37,99,235,0.2)";e.currentTarget.style.color="#4b5563";}}>
                       ✕
                     </button>
                   </div>
@@ -307,8 +342,8 @@ function EmailGenerator({ quote, clientInfo, companyName, onClose }) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const mo = {fontFamily:"monospace"};
-  const am = {color:"#f59e0b"};
+  const mo = {fontFamily:"'DM Mono', monospace"};
+  const am = {color:"#60a5fa"};
 
   const generate = async () => {
     setLoading(true);
@@ -359,7 +394,7 @@ Rules:
 
   return (
     <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.85)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}}>
-      <div style={{background:"#0f0f0f",border:"1px solid #2a2a2a",borderTop:"3px solid #f59e0b",borderRadius:"10px",width:"100%",maxWidth:"600px",maxHeight:"90vh",overflow:"auto",padding:"24px"}}>
+      <div style={{background:"#091424",border:"1px solid rgba(37,99,235,0.2)",borderTop:"3px solid #2563eb",borderRadius:"10px",width:"100%",maxWidth:"600px",maxHeight:"90vh",overflow:"auto",padding:"24px"}}>
 
         {/* Header */}
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"20px"}}>
@@ -367,11 +402,11 @@ Rules:
             <h2 style={{margin:"0 0 2px 0",fontSize:"20px",fontWeight:700,color:"#fff"}}>Cover Email</h2>
             <p style={{margin:0,color:"#6b7280",fontSize:"12px",...mo}}>READY TO SEND WITH YOUR QUOTE</p>
           </div>
-          <button onClick={onClose} style={{background:"transparent",border:"1px solid #2a2a2a",color:"#6b7280",padding:"6px 12px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}>✕ CLOSE</button>
+          <button onClick={onClose} style={{background:"transparent",border:"1px solid rgba(37,99,235,0.2)",color:"#6b7280",padding:"6px 12px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}>✕ CLOSE</button>
         </div>
 
         {/* To/Subject fields */}
-        <div style={{background:"#111",border:"1px solid #1a1a1a",borderRadius:"8px",padding:"12px 16px",marginBottom:"14px"}}>
+        <div style={{background:"#091424",border:"1px solid rgba(37,99,235,0.15)",borderRadius:"8px",padding:"12px 16px",marginBottom:"14px"}}>
           <div style={{display:"flex",gap:"8px",marginBottom:"6px",alignItems:"center"}}>
             <span style={{color:"#6b7280",fontSize:"11px",...mo,width:"60px"}}>TO:</span>
             <span style={{color:"#9ca3af",fontSize:"13px"}}>{clientInfo?.email || "— add client email in quote form"}</span>
@@ -385,7 +420,7 @@ Rules:
         {/* Email body */}
         {loading ? (
           <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"12px",padding:"32px"}}>
-            <div style={{width:"24px",height:"24px",border:"2px solid #2a2a2a",borderTop:"2px solid #f59e0b",borderRadius:"50%",animation:"spin 0.8s linear infinite"}}/>
+            <div style={{width:"24px",height:"24px",border:"2px solid #2a2a2a",borderTop:"2px solid #2563eb",borderRadius:"50%",animation:"spin 0.8s linear infinite"}}/>
             <span style={{color:"#6b7280",...mo,fontSize:"13px"}}>WRITING EMAIL...</span>
           </div>
         ) : (
@@ -393,9 +428,9 @@ Rules:
             value={email}
             onChange={e=>setEmail(e.target.value)}
             rows={12}
-            style={{width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"8px",color:"#e5e7eb",fontSize:"14px",padding:"14px",fontFamily:"sans-serif",lineHeight:1.7,resize:"vertical"}}
-            onFocus={e=>e.target.style.borderColor="#f59e0b"}
-            onBlur={e=>e.target.style.borderColor="#2a2a2a"}
+            style={{width:"100%",background:"#112540",border:"1px solid rgba(37,99,235,0.2)",borderRadius:"8px",color:"#e5e7eb",fontSize:"14px",padding:"14px",fontFamily:"sans-serif",lineHeight:1.7,resize:"vertical"}}
+            onFocus={e=>e.target.style.borderColor="#3b82f6"}
+            onBlur={e=>e.target.style.borderColor="rgba(37,99,235,0.2)"}
           />
         )}
 
@@ -403,17 +438,17 @@ Rules:
         {!loading&&email&&(
           <div style={{display:"flex",gap:"10px",marginTop:"14px",flexWrap:"wrap"}}>
             <button onClick={handleCopy}
-              style={{background:copied?"#065f46":"#f59e0b",border:"none",color:copied?"#34d399":"#000",padding:"10px 18px",borderRadius:"6px",...mo,fontSize:"12px",fontWeight:700,cursor:"pointer"}}>
+              style={{background:copied?"#065f46":"#3b82f6",border:"none",color:copied?"#34d399":"#000",padding:"10px 18px",borderRadius:"6px",...mo,fontSize:"12px",fontWeight:700,cursor:"pointer"}}>
               {copied?"✓ COPIED":"⧉ COPY EMAIL"}
             </button>
             <button onClick={generate}
-              style={{background:"transparent",border:"1px solid #2a2a2a",color:"#9ca3af",padding:"10px 18px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer"}}>
+              style={{background:"transparent",border:"1px solid rgba(37,99,235,0.2)",color:"#9ca3af",padding:"10px 18px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer"}}>
               ↻ REGENERATE
             </button>
           </div>
         )}
 
-        <p style={{color:"#374151",fontSize:"11px",...mo,marginTop:"12px",marginBottom:0}}>
+        <p style={{color:"#6b7280",fontSize:"11px",...mo,marginTop:"12px",marginBottom:0}}>
           Edit the email above before copying. The subject line is suggested — change it as needed.
         </p>
       </div>
@@ -424,7 +459,7 @@ Rules:
 function Spinner() {
   return (
     <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"16px",padding:"48px 0"}}>
-      <div style={{width:"44px",height:"44px",border:"3px solid #2a2a2a",borderTop:"3px solid #f59e0b",borderRadius:"50%",animation:"spin 0.8s linear infinite"}}/>
+      <div style={{width:"44px",height:"44px",border:"3px solid #2a2a2a",borderTop:"3px solid #2563eb",borderRadius:"50%",animation:"spin 0.8s linear infinite"}}/>
       <p style={{color:"#6b7280",fontFamily:"monospace",fontSize:"13px",letterSpacing:"0.05em"}}>GENERATING QUOTE...</p>
     </div>
   );
@@ -443,12 +478,12 @@ function EditableCell({ value, onChange, isQty=false }) {
   if (editing) return (
     <input ref={ref} value={val} onChange={e=>setVal(e.target.value)}
       onBlur={commit} onKeyDown={e=>{if(e.key==="Enter")commit();if(e.key==="Escape"){setVal(value);setEditing(false);}}}
-      style={{background:"#1a1a1a",border:"1px solid #f59e0b",borderRadius:"3px",color:"#fff",padding:"2px 5px",width:"70px",fontFamily:"monospace",fontSize:"12px",textAlign:"right"}}
+      style={{background:"#112540",border:"1px solid #2563eb",borderRadius:"3px",color:"#fff",padding:"2px 5px",width:"70px",fontFamily:"monospace",fontSize:"12px",textAlign:"right"}}
     />
   );
   return (
     <span onClick={()=>{setVal(isQty?value:Number(value).toFixed(2));setEditing(true);}} title="Click to edit"
-      style={{color:"#9ca3af",fontSize:"12px",fontFamily:"monospace",cursor:"pointer",borderBottom:"1px dashed #3a3a3a"}}>
+      style={{color:"#9ca3af",fontSize:"12px",fontFamily:"monospace",cursor:"pointer",borderBottom:"1px dashed rgba(37,99,235,0.2)"}}>
       {isQty ? value : `£${Number(value).toFixed(2)}`}
     </span>
   );
@@ -580,12 +615,12 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
       table{width:100%;border-collapse:collapse;margin:20px 0}
       th{background:#111;color:#fff;padding:10px 12px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;text-align:left}
       th:not(:first-child){text-align:right}
-      .header{border-bottom:3px solid #f59e0b;padding-bottom:20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-start}
+      .header{border-bottom:3px solid #3b82f6;padding-bottom:20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-start}
       .grand-total{font-size:28px;font-weight:800}
       .badge{background:#111;color:#fff;padding:3px 10px;border-radius:4px;font-size:11px;letter-spacing:0.08em;display:inline-block;margin-bottom:8px}
       .meta{color:#888;font-size:12px;margin-top:4px}
       .client-box{background:#f9f9f9;border-radius:6px;padding:12px 16px;margin:16px 0;font-size:13px;color:#444;line-height:1.8}
-      .notes{background:#f9f9f9;border-left:3px solid #f59e0b;padding:12px 16px;font-size:12px;color:#555;line-height:1.7;margin-top:20px}
+      .notes{background:#f9f9f9;border-left:3px solid #2563eb;padding:12px 16px;font-size:12px;color:#555;line-height:1.7;margin-top:20px}
       .totals td{padding:8px 12px;font-size:13px;text-align:right}
       .total-final td{font-weight:700;font-size:16px;border-top:2px solid #111;padding:12px}
     </style></head><body>
@@ -634,36 +669,36 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
   };
 
   const cats = [...new Set(q.lineItems.map(i=>i.category))];
-  const am = {color:"#f59e0b"};
-  const mo = {fontFamily:"monospace"};
+  const am = {color:"#60a5fa"};
+  const mo = {fontFamily:"'DM Mono', monospace"};
 
   return (
     <div style={{animation:"fadeUp 0.4s ease forwards"}}>
 
       {/* Edit tip */}
-      <div className="no-print" style={{background:"#111a0a",border:"1px solid #3a5a10",borderLeft:"3px solid #84cc16",borderRadius:"8px",padding:"11px 16px",marginBottom:"14px",display:"flex",alignItems:"center",gap:"10px"}}>
+      <div className="no-print" style={{background:"rgba(37,99,235,0.08)",border:"1px solid rgba(37,99,235,0.2)",borderLeft:"3px solid #3b82f6",borderRadius:"8px",padding:"11px 16px",marginBottom:"14px",display:"flex",alignItems:"center",gap:"10px"}}>
         <span>✏️</span>
-        <p style={{color:"#bef264",fontSize:"12px",lineHeight:1.5,margin:0}}>
+        <p style={{color:"#93c5fd",fontSize:"12px",lineHeight:1.5,margin:0}}>
           <strong>Click any number or text to edit.</strong> Use + ADD ROW to add items, + ADD NEW SECTION for new categories. Totals update automatically.
         </p>
       </div>
 
       {/* Header */}
-      <div style={{background:"linear-gradient(135deg,#1a1a1a,#0f0f0f)",border:"1px solid #2a2a2a",borderTop:"3px solid #f59e0b",borderRadius:"8px",padding:"22px",marginBottom:"14px"}}>
+      <div style={{background:"linear-gradient(135deg,#0d1e35,#091424)",border:"1px solid rgba(37,99,235,0.2)",borderTop:"3px solid #2563eb",borderRadius:"8px",padding:"22px",marginBottom:"14px"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:"12px"}}>
           <div>
             {companyName&&<div style={{color:"#fff",fontSize:"16px",fontWeight:700,marginBottom:"4px"}}>{companyName}</div>}
             <div style={{...am,...mo,fontSize:"12px",marginBottom:"5px"}}>QUOTE {q.jobRef}</div>
-            <h2 style={{fontSize:"20px",fontWeight:700,color:"#fff",margin:0}}>{q.jobTitle}</h2>
+            <h2 style={{fontSize:"20px",fontWeight:700,color:"#fff",margin:0,fontFamily:"'Outfit', sans-serif",letterSpacing:"-0.01em"}}>{q.jobTitle}</h2>
           </div>
           <div style={{textAlign:"right"}}>
             <div style={{color:"#6b7280",fontSize:"10px",...mo,marginBottom:"3px"}}>TOTAL INC. VAT</div>
-            <div style={{fontSize:"30px",fontWeight:800,...am}}>£{Number(q.grandTotal).toLocaleString("en-GB",{minimumFractionDigits:2})}</div>
+            <div style={{fontSize:"30px",fontWeight:800,...am,fontFamily:"'Outfit', sans-serif",letterSpacing:"-0.02em"}}>£{Number(q.grandTotal).toLocaleString("en-GB",{minimumFractionDigits:2})}</div>
             <div style={{color:"#6b7280",fontSize:"11px",...mo,marginTop:"4px"}}>📅 {new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase()}</div>
           </div>
         </div>
         {(clientInfo.name||clientInfo.address||clientInfo.email||clientInfo.phone)&&(
-          <div style={{marginTop:"14px",paddingTop:"12px",borderTop:"1px solid #2a2a2a"}}>
+          <div style={{marginTop:"14px",paddingTop:"12px",borderTop:"1px solid rgba(37,99,235,0.15)"}}>
             <div style={{color:"#6b7280",fontSize:"10px",...mo,marginBottom:"6px"}}>PREPARED FOR</div>
             <div style={{color:"#9ca3af",fontSize:"13px",lineHeight:1.8}}>
               {clientInfo.name&&<div style={{color:"#e5e7eb",fontWeight:600}}>{clientInfo.name}</div>}
@@ -678,8 +713,8 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
       </div>
 
       {/* Line items */}
-      <div style={{background:"#0f0f0f",border:"1px solid #2a2a2a",borderRadius:"8px",overflow:"hidden",marginBottom:"14px"}}>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 48px 60px 70px 70px 24px",padding:"9px 14px",background:"#1a1a1a",borderBottom:"1px solid #2a2a2a"}}>
+      <div style={{background:"#091424",border:"1px solid rgba(37,99,235,0.2)",borderRadius:"8px",overflow:"hidden",marginBottom:"14px"}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 48px 60px 70px 70px 24px",padding:"9px 14px",background:"#112540",borderBottom:"1px solid rgba(37,99,235,0.15)"}}>
           {["DESCRIPTION","UNIT","QTY","RATE","TOTAL",""].map((h,i)=>(
             <div key={i} style={{color:"#6b7280",fontSize:"10px",...mo,textAlign:i===0?"left":"right"}}>{h}</div>
           ))}
@@ -687,23 +722,23 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
 
         {cats.map((cat,ci)=>(
           <div key={ci}>
-            <div style={{padding:"7px 14px",background:"#141414",borderBottom:"1px solid #1f1f1f",borderTop:ci>0?"1px solid #2a2a2a":"none",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div style={{padding:"7px 14px",background:"#091424",borderBottom:"1px solid #1f1f1f",borderTop:ci>0?"1px solid #2a2a2a":"none",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <span style={{...am,fontSize:"10px",...mo,fontWeight:600}}>{cat.toUpperCase()}</span>
               <button className="no-print" onClick={()=>addItem(cat)}
-                style={{background:"#f59e0b22",border:"1px solid #f59e0b55",color:"#f59e0b",borderRadius:"4px",padding:"2px 8px",fontSize:"11px",cursor:"pointer",fontWeight:700,...mo}}>
+                style={{background:"#2563eb22",border:"1px solid #2563eb55",color:"#3b82f6",borderRadius:"4px",padding:"2px 8px",fontSize:"11px",cursor:"pointer",fontWeight:700,...mo}}>
                 + ADD ROW
               </button>
             </div>
             {q.lineItems.map((item,ii)=>item.category!==cat?null:(
-              <div key={ii} style={{display:"grid",gridTemplateColumns:"1fr 48px 60px 70px 70px 24px",padding:"9px 14px",borderBottom:"1px solid #1a1a1a",alignItems:"center",gap:"4px"}}>
+              <div key={ii} style={{display:"grid",gridTemplateColumns:"1fr 48px 60px 70px 70px 24px",padding:"9px 14px",borderBottom:"1px solid rgba(37,99,235,0.1)",alignItems:"center",gap:"4px"}}>
                 <input value={item.description} onChange={e=>updateDesc(ii,e.target.value)}
                   style={{background:"transparent",border:"none",borderBottom:"1px dashed #2a2a2a",color:"#e5e7eb",fontSize:"13px",padding:"2px 4px",fontFamily:"sans-serif",width:"100%"}}
-                  onFocus={e=>e.target.style.borderBottomColor="#f59e0b"}
+                  onFocus={e=>e.target.style.borderBottomColor="#3b82f6"}
                   onBlur={e=>e.target.style.borderBottomColor="#2a2a2a"}
                 />
                 <input value={item.unit} onChange={e=>updateUnit(ii,e.target.value)}
                   style={{background:"transparent",border:"none",borderBottom:"1px dashed #2a2a2a",color:"#6b7280",fontSize:"11px",fontFamily:"monospace",textAlign:"right",width:"100%",padding:"2px"}}
-                  onFocus={e=>e.target.style.borderBottomColor="#f59e0b"}
+                  onFocus={e=>e.target.style.borderBottomColor="#3b82f6"}
                   onBlur={e=>e.target.style.borderBottomColor="#2a2a2a"}
                 />
                 <div style={{textAlign:"right"}}><EditableCell value={item.qty} isQty onChange={v=>updateItem(ii,"qty",v)}/></div>
@@ -718,11 +753,11 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
           </div>
         ))}
 
-        <div className="no-print" style={{padding:"10px 14px",borderTop:"1px solid #1f1f1f"}}>
+        <div className="no-print" style={{padding:"10px 14px",borderTop:"1px solid rgba(37,99,235,0.1)"}}>
           <button onClick={addCategory}
-            style={{background:"transparent",border:"1px dashed #2a2a2a",color:"#6b7280",borderRadius:"6px",padding:"8px 16px",fontSize:"12px",...mo,cursor:"pointer",width:"100%",letterSpacing:"0.06em"}}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor="#f59e0b55";e.currentTarget.style.color="#f59e0b";}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor="#2a2a2a";e.currentTarget.style.color="#6b7280";}}>
+            style={{background:"transparent",border:"1px dashed rgba(37,99,235,0.2)",color:"#6b7280",borderRadius:"6px",padding:"8px 16px",fontSize:"12px",...mo,cursor:"pointer",width:"100%",letterSpacing:"0.06em"}}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor="#2563eb55";e.currentTarget.style.color="#3b82f6";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(37,99,235,0.2)";e.currentTarget.style.color="#6b7280";}}>
             + ADD NEW SECTION
           </button>
         </div>
@@ -739,7 +774,7 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
                 <div className="no-print" style={{display:"flex",gap:"4px"}}>
                   {[0,5,20].map(r=>(
                     <button key={r} onClick={()=>handleVatRateChange(r)}
-                      style={{background:vatRate===r?"#f59e0b22":"transparent",border:`1px solid ${vatRate===r?"#f59e0b":"#2a2a2a"}`,color:vatRate===r?"#f59e0b":"#6b7280",borderRadius:"4px",padding:"2px 7px",fontSize:"10px",cursor:"pointer",...mo,fontWeight:vatRate===r?700:400}}>
+                      style={{background:vatRate===r?"#2563eb22":"transparent",border:`1px solid ${vatRate===r?"#3b82f6":"#2a2a2a"}`,color:vatRate===r?"#3b82f6":"#6b7280",borderRadius:"4px",padding:"2px 7px",fontSize:"10px",cursor:"pointer",...mo,fontWeight:vatRate===r?700:400}}>
                       {r}%
                     </button>
                   ))}
@@ -754,12 +789,12 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
               <span style={{color:"#4b5563",fontSize:"12px",...mo}}>NOT REGISTERED</span>
             </div>
           )}
-          <div style={{display:"flex",justifyContent:"space-between",marginTop:"10px",paddingTop:"10px",borderTop:"1px solid #2a2a2a"}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginTop:"10px",paddingTop:"10px",borderTop:"1px solid rgba(37,99,235,0.15)"}}>
             <span style={{...am,fontSize:"13px",...mo,fontWeight:700}}>{vatRegistered?`TOTAL INC. VAT (${vatRate}%)`:"TOTAL"}</span>
             <span style={{...am,fontSize:"22px",fontWeight:800}}>£{Number(q.grandTotal).toLocaleString("en-GB",{minimumFractionDigits:2})}</span>
           </div>
           {vatRegistered&&(
-            <div className="no-print" style={{marginTop:"10px",padding:"8px 10px",background:"#111",borderRadius:"6px",border:"1px solid #1a1a1a"}}>
+            <div className="no-print" style={{marginTop:"10px",padding:"8px 10px",background:"#091424",borderRadius:"6px",border:"1px solid rgba(37,99,235,0.15)"}}>
               <p style={{color:"#4b5563",fontSize:"11px",...mo,margin:0,lineHeight:1.5}}>
                 ⚠ VAT rates vary in construction — 5% applies to some renovations and energy-saving works, 0% to new builds. Consult your accountant to confirm the correct rate for this job.
               </p>
@@ -769,7 +804,7 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
       </div>
 
       {/* Editable Terms & Notes */}
-      <div style={{background:"#0f0f0f",border:"1px solid #2a2a2a",borderLeft:"3px solid #f59e0b",borderRadius:"8px",padding:"13px 16px",marginBottom:"16px"}}>
+      <div style={{background:"#091424",border:"1px solid rgba(37,99,235,0.2)",borderLeft:"3px solid #2563eb",borderRadius:"8px",padding:"13px 16px",marginBottom:"16px"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px",flexWrap:"wrap",gap:"6px"}}>
           <div style={{...am,fontSize:"10px",...mo}}>TERMS & NOTES</div>
           <div className="no-print" style={{display:"flex",gap:"6px"}}>
@@ -780,12 +815,12 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
                   setSavedTerms(true);
                   setTimeout(()=>setSavedTerms(false),2000);
                 }}
-                style={{background:savedTerms?"#065f46":"#1a1a1a",border:`1px solid ${savedTerms?"#059669":"#3a3a3a"}`,color:savedTerms?"#34d399":"#9ca3af",borderRadius:"4px",padding:"2px 8px",fontSize:"11px",cursor:"pointer",...mo}}>
+                style={{background:savedTerms?"#065f46":"#112540",border:`1px solid ${savedTerms?"#059669":"rgba(37,99,235,0.2)"}`,color:savedTerms?"#34d399":"#9ca3af",borderRadius:"4px",padding:"2px 8px",fontSize:"11px",cursor:"pointer",...mo}}>
                 {savedTerms?"✓ SAVED":"SAVE AS DEFAULT"}
               </button>
             )}
             <button onClick={()=>setEditingNotes(v=>!v)}
-              style={{background:"#f59e0b22",border:"1px solid #f59e0b44",color:"#f59e0b",borderRadius:"4px",padding:"2px 8px",fontSize:"11px",cursor:"pointer",...mo}}>
+              style={{background:"#2563eb22",border:"1px solid #2563eb44",color:"#3b82f6",borderRadius:"4px",padding:"2px 8px",fontSize:"11px",cursor:"pointer",...mo}}>
               {editingNotes?"DONE":"EDIT"}
             </button>
           </div>
@@ -795,36 +830,36 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
             value={q.notes}
             onChange={e=>{ const updated={...q,notes:e.target.value}; setQ(updated); autoSave(updated); }}
             rows={5}
-            style={{width:"100%",background:"#1a1a1a",border:"1px solid #f59e0b",borderRadius:"6px",color:"#e5e7eb",fontSize:"13px",padding:"10px 12px",fontFamily:"sans-serif",lineHeight:1.6,resize:"vertical"}}
+            style={{width:"100%",background:"#112540",border:"1px solid #2563eb",borderRadius:"6px",color:"#e5e7eb",fontSize:"13px",padding:"10px 12px",fontFamily:"sans-serif",lineHeight:1.6,resize:"vertical"}}
           />
         ) : (
           <p style={{color:"#9ca3af",fontSize:"13px",lineHeight:1.7,margin:0}}>{q.notes}</p>
         )}
         {!editingNotes&&(
-          <p className="no-print" style={{color:"#374151",fontSize:"11px",...mo,margin:"8px 0 0 0"}}>Click EDIT to customise these terms for this quote</p>
+          <p className="no-print" style={{color:"#6b7280",fontSize:"11px",...mo,margin:"8px 0 0 0"}}>Click EDIT to customise these terms for this quote</p>
         )}
       </div>
 
       {/* Actions */}
       <div className="no-print" style={{display:"flex",gap:"10px",flexWrap:"wrap"}}>
         <button onClick={()=>setShowEmail(true)}
-          style={{background:"#f59e0b",border:"none",color:"#000",padding:"10px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer",fontWeight:700}}>
+          style={{background:"#3b82f6",border:"none",color:"#000",padding:"10px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer",fontWeight:700}}>
           ✉ GENERATE EMAIL
         </button>
         <button onClick={handleSave}
-          style={{background:saved?"#065f46":"#1a1a1a",border:`1px solid ${saved?"#059669":"#3a3a3a"}`,color:saved?"#34d399":"#6b7280",padding:"10px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer"}}>
+          style={{background:saved?"#065f46":"#112540",border:`1px solid ${saved?"#059669":"rgba(37,99,235,0.2)"}`,color:saved?"#34d399":"#6b7280",padding:"10px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer"}}>
           {saved?"✓ SAVED":"💾 SAVE"}
         </button>
         <button onClick={handleCopy}
-          style={{background:copied?"#065f46":"#1a1a1a",border:`1px solid ${copied?"#059669":"#3a3a3a"}`,color:copied?"#34d399":"#e5e7eb",padding:"10px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer"}}>
+          style={{background:copied?"#065f46":"#112540",border:`1px solid ${copied?"#059669":"rgba(37,99,235,0.2)"}`,color:copied?"#34d399":"#e5e7eb",padding:"10px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer"}}>
           {copied?"✓ COPIED":"⧉ COPY TEXT"}
         </button>
         <button onClick={handlePrint}
-          style={{background:"#1a1a1a",border:"1px solid #3a3a3a",color:"#e5e7eb",padding:"10px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer"}}>
+          style={{background:"#112540",border:"1px solid rgba(37,99,235,0.2)",color:"#e5e7eb",padding:"10px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer"}}>
           🖨 PRINT / SAVE PDF
         </button>
         <button onClick={onReset}
-          style={{background:"transparent",border:"1px solid #2a2a2a",color:"#6b7280",padding:"10px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer"}}>
+          style={{background:"transparent",border:"1px solid rgba(37,99,235,0.2)",color:"#6b7280",padding:"10px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer"}}>
           ← NEW QUOTE
         </button>
       </div>
@@ -916,41 +951,43 @@ export default function App() {
 
   const reset = () => { setStep("form"); setQuote(null); setErrorMsg(""); setJobDesc(""); setMaterialsHints(""); setEstimatedHours(""); setQuoteLabourRate(labourRate||""); setClientInfo({name:"",address:"",email:"",phone:""}); };
 
-  const inp = {width:"100%",background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:"6px",padding:"10px 13px",color:"#e5e7eb",fontSize:"14px",fontFamily:"sans-serif"};
-  const lbl = {display:"block",color:"#9ca3af",fontSize:"11px",fontFamily:"monospace",letterSpacing:"0.1em",marginBottom:"6px"};
-  const mo = {fontFamily:"monospace"};
+  const inp = {width:"100%",background:"#1e3a5f",border:"1px solid rgba(96,165,250,0.25)",borderRadius:"8px",padding:"10px 14px",color:"#f1f5f9",fontSize:"14px",fontFamily:"'DM Sans', sans-serif",transition:"border-color 0.2s"};
+  const lbl = {display:"block",color:"#93c5fd",fontSize:"11px",fontFamily:"'DM Mono', monospace",letterSpacing:"0.12em",marginBottom:"8px",fontWeight:600};
+  const mo = {fontFamily:"'DM Mono', monospace"};
 
   return (
-    <div style={{minHeight:"100vh",background:"#080808",color:"#e5e7eb",fontFamily:"sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"#050d1a",color:"#e5e7eb",fontFamily:"'DM Sans', sans-serif"}}>
       {/* Header */}
-      <div className="no-print" style={{borderBottom:"1px solid #1a1a1a",background:"#050505",padding:"0 20px"}}>
-        <div style={{maxWidth:"740px",margin:"0 auto",padding:"16px 0",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      <div className="no-print" style={{borderBottom:"1px solid rgba(255,255,255,0.06)",background:"rgba(5,13,26,0.85)",backdropFilter:"blur(12px)",padding:"0 20px",position:"sticky",top:0,zIndex:100}}>
+        <div style={{maxWidth:"740px",margin:"0 auto",padding:"14px 0",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
-            <div style={{width:"32px",height:"32px",background:"#f59e0b",borderRadius:"6px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"15px"}}>🏗</div>
+            <div style={{width:"36px",height:"36px",background:"linear-gradient(135deg,#2563eb 0%,#60a5fa 100%)",borderRadius:"10px",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 18px rgba(37,99,235,0.45)",flexShrink:0}}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 12H15M9 8H15M9 16H12M5 20H19C20.1 20 21 19.1 21 18V6C21 4.9 20.1 4 19 4H5C3.9 4 3 4.9 3 6V18C3 19.1 3.9 20 5 20Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
             <div>
-              <div style={{fontSize:"18px",fontWeight:800,color:"#fff",letterSpacing:"0.04em",lineHeight:1}}>BRIEFQUOTE</div>
-              <div style={{color:"#4b5563",fontSize:"10px",...mo,letterSpacing:"0.1em"}}>AI QUOTE GENERATOR FOR BUILDERS</div>
+              <div style={{fontSize:"19px",fontWeight:800,color:"#fff",fontFamily:"'Outfit', sans-serif",letterSpacing:"-0.02em",lineHeight:1}}>Brief<span style={{color:"#60a5fa"}}>Quote</span></div>
+              <div style={{color:"#4b5563",fontSize:"10px",fontFamily:"'DM Mono', monospace",letterSpacing:"0.1em"}}>AI QUOTE GENERATOR FOR TRADESMEN</div>
             </div>
           </div>
           <div style={{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap",justifyContent:"flex-end"}}>
             <button onClick={()=>setShowHistory(v=>!v)}
-              style={{background:showHistory?"#1a1a1a":"transparent",border:"1px solid #2a2a2a",color:showHistory?"#f59e0b":"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
+              style={{background:showHistory?"#112540":"transparent",border:"1px solid rgba(37,99,235,0.2)",color:showHistory?"#3b82f6":"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
               📋 HISTORY
             </button>
             <button onClick={()=>setShowSettings(v=>!v)}
-              style={{background:showSettings?"#1a1a1a":"transparent",border:"1px solid #2a2a2a",color:showSettings?"#f59e0b":"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
+              style={{background:showSettings?"#112540":"transparent",border:"1px solid rgba(37,99,235,0.2)",color:showSettings?"#3b82f6":"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
               ⚙ {showSettings?"HIDE":"SETTINGS"}
             </button>
-            {step==="result"&&<button onClick={reset} style={{background:"transparent",border:"1px solid #2a2a2a",color:"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>← NEW QUOTE</button>}
+            {step==="result"&&<button onClick={reset} style={{background:"transparent",border:"1px solid rgba(37,99,235,0.2)",color:"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>← NEW QUOTE</button>}
           </div>
         </div>
       </div>
 
       {/* Settings panel */}
       {showSettings&&(
-        <div className="no-print" style={{background:"#0a0a0a",borderBottom:"1px solid #1a1a1a",padding:"0 20px"}}>
+        <div className="no-print" style={{background:"rgba(5,13,26,0.97)",borderBottom:"1px solid rgba(37,99,235,0.12)",padding:"0 20px"}}>
           <div style={{maxWidth:"740px",margin:"0 auto",padding:"20px 0"}}>
-            <div style={{color:"#f59e0b",fontSize:"11px",...mo,letterSpacing:"0.1em",marginBottom:"14px"}}>⚙ DEFAULT SETTINGS — saved automatically</div>
+            <div style={{color:"#60a5fa",fontSize:"11px",...mo,letterSpacing:"0.1em",marginBottom:"14px"}}>⚙ DEFAULT SETTINGS — saved automatically</div>
             <div style={{marginBottom:"14px"}}>
               <label style={lbl}>YOUR COMPANY NAME</label>
               <input value={companyName} onChange={e=>setCompanyName(e.target.value)} placeholder="e.g. ABC Construction Ltd" style={inp}/>
@@ -962,7 +999,7 @@ export default function App() {
                   onClick={()=>setVatRegistered(v=>!v)}
                   style={{
                     width:"48px",height:"26px",borderRadius:"13px",border:"none",cursor:"pointer",
-                    background:vatRegistered?"#f59e0b":"#2a2a2a",
+                    background:vatRegistered?"#3b82f6":"#2a2a2a",
                     position:"relative",transition:"background 0.2s",flexShrink:0
                   }}>
                   <div style={{
@@ -972,7 +1009,7 @@ export default function App() {
                     transition:"left 0.2s"
                   }}/>
                 </button>
-                <span style={{color: vatRegistered?"#f59e0b":"#6b7280",fontSize:"13px",fontFamily:"monospace",fontWeight:600}}>
+                <span style={{color: vatRegistered?"#3b82f6":"#6b7280",fontSize:"13px",fontFamily:"monospace",fontWeight:600}}>
                   {vatRegistered?"VAT REGISTERED — 20% added to quotes":"NOT VAT REGISTERED — no VAT on quotes"}
                 </span>
               </div>
@@ -987,13 +1024,13 @@ export default function App() {
                 placeholder="e.g. 45"
                 style={{...inp, width:"180px"}}
               />
-              <div style={{color:"#374151",fontSize:"11px",...mo,marginTop:"4px"}}>Used to calculate labour costs accurately on every quote.</div>
+              <div style={{color:"#6b7280",fontSize:"11px",...mo,marginTop:"4px"}}>Used to calculate labour costs accurately on every quote.</div>
             </div>
             <div>
               <label style={lbl}>DEFAULT TERMS & NOTES</label>
               <textarea value={defaultTerms} onChange={e=>setDefaultTerms(e.target.value)} rows={4}
-                style={{...inp,lineHeight:1.6,resize:"vertical",fontSize:"13px"}}/>
-              <div style={{color:"#374151",fontSize:"11px",...mo,marginTop:"4px"}}>These will appear on every new quote. You can still edit per-quote.</div>
+                style={{...inp,lineHeight:1.6,resize:"vertical",fontSize:"13px",background:"#1e3a5f",color:"#f1f5f9"}}/>
+              <div style={{color:"#6b7280",fontSize:"11px",...mo,marginTop:"4px"}}>These will appear on every new quote. You can still edit per-quote.</div>
             </div>
           </div>
         </div>
@@ -1004,12 +1041,12 @@ export default function App() {
         {step==="setup"&&(
           <div style={{animation:"fadeUp 0.4s ease forwards"}}>
             <div style={{textAlign:"center",marginBottom:"32px"}}>
-              <div style={{width:"56px",height:"56px",background:"#f59e0b",borderRadius:"12px",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"26px",margin:"0 auto 16px"}}>🏗</div>
-              <h1 style={{fontSize:"32px",fontWeight:800,color:"#fff",margin:"0 0 8px 0",lineHeight:1.1}}>Welcome to BriefQuote</h1>
+              <div style={{width:"56px",height:"56px",background:"linear-gradient(135deg,#2563eb,#60a5fa)",borderRadius:"14px",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",boxShadow:"0 0 24px rgba(37,99,235,0.4)"}}><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M9 12H15M9 8H15M9 16H12M5 20H19C20.1 20 21 19.1 21 18V6C21 4.9 20.1 4 19 4H5C3.9 4 3 4.9 3 6V18C3 19.1 3.9 20 5 20Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+              <h1 style={{fontSize:"32px",fontWeight:800,color:"#fff",margin:"0 0 8px 0",lineHeight:1.1,fontFamily:"'Outfit', sans-serif",letterSpacing:"-0.02em"}}>Welcome to BriefQuote</h1>
               <p style={{color:"#6b7280",fontSize:"15px",margin:0}}>Quick setup — takes 30 seconds. You can change these anytime.</p>
             </div>
 
-            <div style={{background:"#0f0f0f",border:"1px solid #1f1f1f",borderRadius:"10px",padding:"24px",marginBottom:"12px"}}>
+            <div style={{background:"#091424",border:"1px solid rgba(37,99,235,0.15)",borderRadius:"10px",padding:"24px",marginBottom:"12px"}}>
               <label style={lbl}>YOUR COMPANY NAME *</label>
               <input
                 value={companyName}
@@ -1018,14 +1055,14 @@ export default function App() {
                 style={{...inp, fontSize:"15px"}}
                 autoFocus
               />
-              <div style={{color:"#374151",fontSize:"11px",fontFamily:"monospace",marginTop:"8px"}}>
+              <div style={{color:"#94a3b8",fontSize:"11px",fontFamily:"monospace",marginTop:"8px"}}>
                 This will appear on all your quotes. You can change it anytime in Settings.
               </div>
             </div>
 
             {/* How it works — shown once on setup only */}
-            <div style={{background:"#0f0f0f",border:"1px solid #1f1f1f",borderRadius:"10px",padding:"20px",marginBottom:"12px"}}>
-              <div style={{color:"#f59e0b",fontSize:"11px",fontFamily:"monospace",letterSpacing:"0.1em",marginBottom:"14px"}}>✦ HOW BRIEFQUOTE WORKS</div>
+            <div style={{background:"rgba(11,25,46,0.95)",border:"1px solid rgba(96,165,250,0.18)",borderRadius:"12px",padding:"22px",marginBottom:"14px"}}>
+              <div style={{color:"#3b82f6",fontSize:"11px",fontFamily:"monospace",letterSpacing:"0.1em",marginBottom:"14px"}}>✦ HOW BRIEFQUOTE WORKS</div>
               <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
                 {[
                   ["⚡","Describe any job and get a professional itemised quote in seconds"],
@@ -1046,10 +1083,10 @@ export default function App() {
 
             <button
               onClick={()=>{ if(!companyName.trim()){ alert("Please enter your company name."); return; } saveSettings({companyName,defaultTerms}); setStep("form"); }}
-              style={{width:"100%",background:"#f59e0b",border:"none",color:"#000",padding:"14px 24px",borderRadius:"8px",fontSize:"18px",fontWeight:800,letterSpacing:"0.04em",cursor:"pointer",marginBottom:"12px"}}>
+              style={{width:"100%",background:"#3b82f6",border:"none",color:"#000",padding:"14px 24px",borderRadius:"8px",fontSize:"18px",fontWeight:800,letterSpacing:"0.04em",cursor:"pointer",marginBottom:"12px"}}>
               START GENERATING QUOTES →
             </button>
-            <p style={{color:"#374151",fontSize:"12px",textAlign:"center",margin:0,fontFamily:"monospace"}}>
+            <p style={{color:"#94a3b8",fontSize:"12px",textAlign:"center",margin:0,fontFamily:"monospace"}}>
               Your details are saved locally on this device only.
             </p>
           </div>
@@ -1081,25 +1118,25 @@ export default function App() {
 
         {!showHistory && step==="form"&&(
           <div>
-            <h1 style={{fontSize:"36px",fontWeight:800,color:"#fff",margin:"0 0 6px 0",lineHeight:1.1}}>
-              Professional quotes.<br/><span style={{color:"#f59e0b"}}>In 30 seconds.</span>
+            <h1 style={{fontSize:"clamp(28px,5vw,40px)",fontWeight:800,color:"#fff",margin:"0 0 8px 0",lineHeight:1.08,fontFamily:"'Outfit', sans-serif",letterSpacing:"-0.03em"}}>
+              Professional quotes.<br/><span style={{background:"linear-gradient(135deg,#3b82f6 0%,#60a5fa 100%)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>In 30 seconds.</span>
             </h1>
-            <p style={{color:"#6b7280",fontSize:"14px",margin:"0 0 20px 0"}}>Describe the job, get a fully itemised quote with labour, materials and VAT.</p>
+            <p style={{color:"#cbd5e1",fontSize:"15px",margin:"0 0 24px 0",lineHeight:1.6}}>Describe the job, get a fully itemised quote with labour, materials and VAT.</p>
 
-            <div style={{background:"#0f0f0f",border:"1px solid #1f1f1f",borderRadius:"10px",padding:"20px",marginBottom:"12px"}}>
+            <div style={{background:"rgba(11,25,46,0.95)",border:"1px solid rgba(96,165,250,0.18)",borderRadius:"12px",padding:"22px",marginBottom:"14px"}}>
               <label style={lbl}>DESCRIBE THE JOB *</label>
               <textarea value={jobDesc} onChange={e=>setJobDesc(e.target.value)}
                 placeholder="e.g. Single storey rear extension, approx 4m x 5m. Brick and block construction with flat roof, bi-fold doors, underfloor heating, plastered and painted. Manchester."
-                rows={4} style={{...inp,lineHeight:1.6,resize:"vertical"}}/>
-              <div style={{color:"#374151",fontSize:"11px",...mo,marginTop:"5px",textAlign:"right"}}>MORE DETAIL = BETTER QUOTE</div>
+                rows={4} style={{...inp,lineHeight:1.6,resize:"vertical",background:"#1e3a5f",color:"#f1f5f9"}}/>
+              <div style={{color:"#60a5fa",fontSize:"11px",...mo,marginTop:"6px",textAlign:"right",letterSpacing:"0.08em"}}>✦ MORE DETAIL = BETTER QUOTE</div>
             </div>
 
-            <div style={{background:"#0f0f0f",border:"1px solid #1f1f1f",borderRadius:"10px",padding:"20px",marginBottom:"12px"}}>
+            <div style={{background:"rgba(11,25,46,0.95)",border:"1px solid rgba(96,165,250,0.18)",borderRadius:"12px",padding:"22px",marginBottom:"14px"}}>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"16px",marginBottom:"16px"}}>
                 <div>
                   <label style={lbl}>YOUR LABOUR RATE (£/HR)</label>
                   <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-                    <span style={{color:"#f59e0b",fontFamily:"monospace",fontSize:"16px",fontWeight:700}}>£</span>
+                    <span style={{color:"#3b82f6",fontFamily:"monospace",fontSize:"16px",fontWeight:700}}>£</span>
                     <input
                       type="number"
                       value={quoteLabourRate}
@@ -1113,7 +1150,7 @@ export default function App() {
                     <div style={{color:"#4b5563",fontSize:"10px",fontFamily:"monospace",marginTop:"4px"}}>✓ FROM SETTINGS</div>
                   )}
                   {quoteLabourRate && quoteLabourRate!==labourRate && (
-                    <div style={{color:"#f59e0b",fontSize:"10px",fontFamily:"monospace",marginTop:"4px"}}>OVERRIDE FOR THIS QUOTE</div>
+                    <div style={{color:"#3b82f6",fontSize:"10px",fontFamily:"monospace",marginTop:"4px"}}>OVERRIDE FOR THIS QUOTE</div>
                   )}
                 </div>
                 <div>
@@ -1129,7 +1166,7 @@ export default function App() {
                     />
                     <span style={{color:"#4b5563",fontSize:"11px",fontFamily:"monospace"}}>/hrs</span>
                   </div>
-                  <div style={{color:"#374151",fontSize:"10px",fontFamily:"monospace",marginTop:"4px"}}>Leave blank to let AI estimate</div>
+                  <div style={{color:"#94a3b8",fontSize:"10px",fontFamily:"'DM Mono', monospace",marginTop:"4px"}}>Leave blank to let AI estimate</div>
                 </div>
               </div>
               <label style={lbl}>SPECIFIC MATERIALS OR PARTS (OPTIONAL)</label>
@@ -1138,20 +1175,20 @@ export default function App() {
                 onChange={e=>setMaterialsHints(e.target.value)}
                 placeholder={"e.g. Grohe kitchen tap £85, 20m2 porcelain tile £18/m2, underfloor heating kit £320"}
                 rows={3}
-                style={{...inp, lineHeight:1.6, resize:"vertical", fontSize:"13px"}}
+                style={{...inp, lineHeight:1.6, resize:"vertical", fontSize:"13px", background:"#1e3a5f", color:"#f1f5f9"}}
               />
-              <div style={{color:"#374151",fontSize:"11px",fontFamily:"monospace",marginTop:"5px"}}>
+              <div style={{color:"#94a3b8",fontSize:"11px",fontFamily:"'DM Mono', monospace",marginTop:"6px"}}>
                 Enter any materials or parts with known prices — the quote will use these exact figures.
               </div>
             </div>
 
-            <div style={{background:"#0f0f0f",border:"1px solid #1f1f1f",borderRadius:"10px",marginBottom:"12px",overflow:"hidden"}}>
+            <div style={{background:"rgba(11,25,46,0.95)",border:"1px solid rgba(96,165,250,0.18)",borderRadius:"12px",marginBottom:"14px",overflow:"hidden"}}>
               <button onClick={()=>setShowClient(v=>!v)} style={{width:"100%",background:"none",border:"none",padding:"13px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",color:"#9ca3af"}}>
-                <span style={{fontSize:"11px",...mo,letterSpacing:"0.1em"}}>CLIENT DETAILS (OPTIONAL)</span>
-                <span style={{color:"#f59e0b"}}>{showClient?"▲":"▼"}</span>
+                <span style={{fontSize:"11px",...mo,letterSpacing:"0.12em",color:"#93c5fd",fontWeight:600}}>CLIENT DETAILS (OPTIONAL)</span>
+                <span style={{color:"#60a5fa",fontSize:"13px"}}>{showClient?"▲":"▼"}</span>
               </button>
               {showClient&&(
-                <div style={{padding:"0 20px 20px",borderTop:"1px solid #1a1a1a"}}>
+                <div style={{padding:"0 20px 20px",borderTop:"1px solid rgba(37,99,235,0.1)"}}>
                   <div style={{height:"14px"}}/>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"12px"}}>
                     <div><label style={lbl}>CLIENT NAME</label><input value={clientInfo.name} onChange={e=>setClientInfo(p=>({...p,name:e.target.value}))} placeholder="John Smith" style={inp}/></div>
@@ -1167,12 +1204,12 @@ export default function App() {
 
             <div style={{display:"flex",gap:"8px",flexWrap:"wrap",marginBottom:"12px"}}>
               {["Kitchen renovation, mid-terrace, new units, worktops, tiling and plumbing","New bathroom installation, full strip out and refit, ground floor","Loft conversion, 3-bed semi, dormer window, en-suite bathroom"].map((ex,i)=>(
-                <button key={i} onClick={()=>setJobDesc(ex)} style={{background:"#111",border:"1px solid #2a2a2a",color:"#9ca3af",fontSize:"12px",padding:"6px 12px",borderRadius:"20px",cursor:"pointer"}}>{ex}</button>
+                <button key={i} onClick={()=>setJobDesc(ex)} style={{background:"#112540",border:"1px solid rgba(96,165,250,0.2)",color:"#94a3b8",fontSize:"12px",padding:"6px 14px",borderRadius:"20px",cursor:"pointer",transition:"all 0.2s"}}>{ex}</button>
               ))}
             </div>
 
-            <button onClick={generate} disabled={jobDesc.trim().length<15}
-              style={{width:"100%",background:jobDesc.trim().length>=15?"#f59e0b":"#1a1a1a",border:"none",color:jobDesc.trim().length>=15?"#000":"#374151",padding:"13px 24px",borderRadius:"8px",fontSize:"17px",fontWeight:700,letterSpacing:"0.06em",cursor:jobDesc.trim().length>=15?"pointer":"not-allowed"}}>
+            <button onClick={generate} disabled={jobDesc.trim().length<15} className={jobDesc.trim().length>=15?"btn-glow":""}
+              style={{width:"100%",background:jobDesc.trim().length>=15?"#2563eb":"#112540",border:"none",color:jobDesc.trim().length>=15?"#fff":"#4b5563",padding:"14px 24px",borderRadius:"10px",fontSize:"16px",fontWeight:700,letterSpacing:"0.06em",cursor:jobDesc.trim().length>=15?"pointer":"not-allowed",transition:"all 0.2s",fontFamily:"'Outfit', sans-serif",boxShadow:jobDesc.trim().length>=15?"0 0 30px rgba(37,99,235,0.3)":"none"}}>
               GENERATE QUOTE →
             </button>
           </div>
@@ -1201,15 +1238,15 @@ export default function App() {
               <div style={{color:"#f87171",fontSize:"13px",...mo,marginBottom:"8px"}}>ERROR DETAILS</div>
               <p style={{color:"#fca5a5",fontSize:"14px",margin:0,lineHeight:1.6,wordBreak:"break-all"}}>{errorMsg}</p>
             </div>
-            <button onClick={()=>setStep("form")} style={{background:"#f59e0b",border:"none",color:"#000",padding:"11px 20px",borderRadius:"6px",...mo,fontSize:"12px",fontWeight:700,cursor:"pointer"}}>← TRY AGAIN</button>
+            <button onClick={()=>setStep("form")} style={{background:"#3b82f6",border:"none",color:"#000",padding:"11px 20px",borderRadius:"6px",...mo,fontSize:"12px",fontWeight:700,cursor:"pointer"}}>← TRY AGAIN</button>
           </div>
         )}
       </div>
 
-      <div className="no-print" style={{borderTop:"1px solid #111",padding:"12px 20px",marginTop:"24px"}}>
+      <div className="no-print" style={{borderTop:"1px solid rgba(37,99,235,0.1)",padding:"12px 20px",marginTop:"24px"}}>
         <div style={{maxWidth:"740px",margin:"0 auto",display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
-          <span style={{color:"#374151",fontSize:"11px",...mo}}>BRIEFQUOTE © 2026</span>
-          <span style={{color:"#374151",fontSize:"11px",...mo}}>ALWAYS VERIFY RATES WITH YOUR SUPPLIER</span>
+          <span style={{color:"#6b7280",fontSize:"11px",...mo}}>BRIEFQUOTE © 2026</span>
+          <span style={{color:"#6b7280",fontSize:"11px",...mo}}>ALWAYS VERIFY RATES WITH YOUR SUPPLIER</span>
         </div>
       </div>
     </div>
