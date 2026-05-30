@@ -113,8 +113,13 @@ const css = `
   input::placeholder, textarea::placeholder { color: #64748b !important; }
   select:focus { border-color: rgba(96,165,250,0.7) !important; }
   @media (max-width: 600px) {
-    .line-items-grid { grid-template-columns: 1fr 36px 44px 60px 60px 20px !important; font-size: 11px !important; }
-    .line-items-grid input { font-size: 11px !important; }
+    .line-items-header { display: none !important; }
+    .line-item-desktop { display: none !important; }
+    .line-item-mobile { display: flex !important; }
+  }
+  @media (min-width: 601px) {
+    .line-item-mobile { display: none !important; }
+    .line-item-desktop { display: grid !important; }
   }
 `;
 
@@ -743,7 +748,14 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
             </div>
           </div>
         )}
-        <p style={{color:"#9ca3af",fontSize:"13px",lineHeight:1.6,margin:"14px 0 0 0"}}>{q.summary}</p>
+        <textarea
+          value={q.summary}
+          onChange={e=>{ const updated = {...q, summary:e.target.value}; setQ(updated); autoSave(updated); }}
+          style={{background:"transparent",border:"none",borderBottom:"1px dashed rgba(96,165,250,0.2)",color:"#9ca3af",fontSize:"13px",lineHeight:1.6,margin:"14px 0 0 0",width:"100%",resize:"none",fontFamily:"'DM Sans', sans-serif",padding:"2px 0",minHeight:"60px"}}
+          onFocus={e=>{e.target.style.borderBottomColor="rgba(96,165,250,0.6)"; e.target.style.color="#cbd5e1";}}
+          onBlur={e=>{e.target.style.borderBottomColor="rgba(96,165,250,0.2)"; e.target.style.color="#9ca3af";}}
+          rows={3}
+        />
         <div style={{color:"#6b7280",fontSize:"11px",...mo,marginTop:"8px"}}>⏱ EST. {q.duration.toUpperCase()}</div>
       </div>
 
@@ -765,24 +777,63 @@ function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatReg
               </button>
             </div>
             {q.lineItems.map((item,ii)=>item.category!==cat?null:(
-              <div key={ii} className="line-items-grid" style={{display:"grid",gridTemplateColumns:"1fr 48px 60px 70px 70px 24px",padding:"9px 14px",borderBottom:"1px solid rgba(37,99,235,0.1)",alignItems:"center",gap:"4px"}}>
-                <input value={item.description} onChange={e=>updateDesc(ii,e.target.value)}
-                  style={{background:"transparent",border:"none",borderBottom:"1px dashed #2a2a2a",color:"#e5e7eb",fontSize:"13px",padding:"2px 4px",fontFamily:"sans-serif",width:"100%"}}
-                  onFocus={e=>e.target.style.borderBottomColor="#3b82f6"}
-                  onBlur={e=>e.target.style.borderBottomColor="#2a2a2a"}
-                />
-                <input value={item.unit} onChange={e=>updateUnit(ii,e.target.value)}
-                  style={{background:"transparent",border:"none",borderBottom:"1px dashed #2a2a2a",color:"#6b7280",fontSize:"11px",fontFamily:"monospace",textAlign:"right",width:"100%",padding:"2px"}}
-                  onFocus={e=>e.target.style.borderBottomColor="#3b82f6"}
-                  onBlur={e=>e.target.style.borderBottomColor="#2a2a2a"}
-                />
-                <div style={{textAlign:"right"}}><EditableCell value={item.qty} isQty onChange={v=>updateItem(ii,"qty",v)}/></div>
-                <div style={{textAlign:"right"}}><EditableCell value={item.rate} onChange={v=>updateItem(ii,"rate",v)}/></div>
-                <div style={{textAlign:"right"}}><EditableCell value={item.total} onChange={v=>updateItem(ii,"total",v)}/></div>
-                <button className="no-print" onClick={()=>deleteItem(ii)}
-                  style={{background:"none",border:"none",color:"#4b5563",cursor:"pointer",fontSize:"14px",padding:0,textAlign:"center",lineHeight:1}}
-                  onMouseEnter={e=>e.currentTarget.style.color="#ef4444"}
-                  onMouseLeave={e=>e.currentTarget.style.color="#4b5563"}>✕</button>
+              <div key={ii}>
+                {/* Desktop row */}
+                <div className="line-item-desktop" style={{gridTemplateColumns:"1fr 48px 60px 70px 70px 24px",padding:"9px 14px",borderBottom:"1px solid rgba(37,99,235,0.1)",alignItems:"center",gap:"4px"}}>
+                  <input value={item.description} onChange={e=>updateDesc(ii,e.target.value)}
+                    style={{background:"transparent",border:"none",borderBottom:"1px dashed rgba(96,165,250,0.2)",color:"#f1f5f9",fontSize:"13px",padding:"2px 4px",fontFamily:"'DM Sans', sans-serif",width:"100%"}}
+                    onFocus={e=>e.target.style.borderBottomColor="#3b82f6"}
+                    onBlur={e=>e.target.style.borderBottomColor="rgba(96,165,250,0.2)"}
+                  />
+                  <input value={item.unit} onChange={e=>updateUnit(ii,e.target.value)}
+                    style={{background:"transparent",border:"none",borderBottom:"1px dashed rgba(96,165,250,0.2)",color:"#94a3b8",fontSize:"11px",fontFamily:"'DM Mono', monospace",textAlign:"right",width:"100%",padding:"2px"}}
+                    onFocus={e=>e.target.style.borderBottomColor="#3b82f6"}
+                    onBlur={e=>e.target.style.borderBottomColor="rgba(96,165,250,0.2)"}
+                  />
+                  <div style={{textAlign:"right"}}><EditableCell value={item.qty} isQty onChange={v=>updateItem(ii,"qty",v)}/></div>
+                  <div style={{textAlign:"right"}}><EditableCell value={item.rate} onChange={v=>updateItem(ii,"rate",v)}/></div>
+                  <div style={{textAlign:"right"}}><EditableCell value={item.total} onChange={v=>updateItem(ii,"total",v)}/></div>
+                  <button className="no-print" onClick={()=>deleteItem(ii)}
+                    style={{background:"none",border:"none",color:"#4b5563",cursor:"pointer",fontSize:"14px",padding:0,textAlign:"center",lineHeight:1}}
+                    onMouseEnter={e=>e.currentTarget.style.color="#ef4444"}
+                    onMouseLeave={e=>e.currentTarget.style.color="#4b5563"}>✕</button>
+                </div>
+                {/* Mobile card */}
+                <div className="line-item-mobile no-print" style={{flexDirection:"column",padding:"12px 14px",borderBottom:"1px solid rgba(37,99,235,0.1)",gap:"8px"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:"8px"}}>
+                    <input value={item.description} onChange={e=>updateDesc(ii,e.target.value)}
+                      style={{background:"transparent",border:"none",borderBottom:"1px dashed rgba(96,165,250,0.2)",color:"#f1f5f9",fontSize:"14px",padding:"2px 0",fontFamily:"'DM Sans', sans-serif",flex:1}}
+                      onFocus={e=>e.target.style.borderBottomColor="#3b82f6"}
+                      onBlur={e=>e.target.style.borderBottomColor="rgba(96,165,250,0.2)"}
+                    />
+                    <button onClick={()=>deleteItem(ii)}
+                      style={{background:"none",border:"none",color:"#4b5563",cursor:"pointer",fontSize:"16px",padding:"0 0 0 8px",flexShrink:0}}
+                      onMouseEnter={e=>e.currentTarget.style.color="#ef4444"}
+                      onMouseLeave={e=>e.currentTarget.style.color="#4b5563"}>✕</button>
+                  </div>
+                  <div style={{display:"flex",alignItems:"center",gap:"12px",flexWrap:"wrap"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:"4px"}}>
+                      <span style={{color:"#4b5563",fontSize:"10px",...mo}}>UNIT</span>
+                      <input value={item.unit} onChange={e=>updateUnit(ii,e.target.value)}
+                        style={{background:"transparent",border:"none",borderBottom:"1px dashed rgba(96,165,250,0.2)",color:"#60a5fa",fontSize:"11px",fontFamily:"'DM Mono', monospace",width:"40px",padding:"1px 2px",textAlign:"center"}}
+                        onFocus={e=>e.target.style.borderBottomColor="#3b82f6"}
+                        onBlur={e=>e.target.style.borderBottomColor="rgba(96,165,250,0.2)"}
+                      />
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:"4px"}}>
+                      <span style={{color:"#4b5563",fontSize:"10px",...mo}}>QTY</span>
+                      <EditableCell value={item.qty} isQty onChange={v=>updateItem(ii,"qty",v)}/>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:"4px"}}>
+                      <span style={{color:"#4b5563",fontSize:"10px",...mo}}>RATE</span>
+                      <EditableCell value={item.rate} onChange={v=>updateItem(ii,"rate",v)}/>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:"4px",marginLeft:"auto"}}>
+                      <span style={{color:"#4b5563",fontSize:"10px",...mo}}>TOTAL</span>
+                      <EditableCell value={item.total} onChange={v=>updateItem(ii,"total",v)}/>
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
