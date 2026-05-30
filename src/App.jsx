@@ -21,6 +21,7 @@ IMPORTANT PRICING RULES:
   * Landscaper: 20-30/hr
 - If the user specifies their trade, use that trade's rates for labour line items
 - If the trade is "Other / Multi-Trade", use the most appropriate rates for the specific work described in the job description
+- If CIS is mentioned, note that CIS deductions are calculated separately and shown on the quote — do not adjust labour rates for CIS
 - Always price on the lower-to-mid end so tradesmen can adjust upward if needed
 - For small jobs (under 500), keep line items minimal and realistic
 - Do not add unnecessary line items to inflate the quote
@@ -29,7 +30,7 @@ IMPORTANT PRICING RULES:
 Return ONLY valid JSON with this exact structure, no other text before or after:
 {
   "jobTitle": "Brief job title",
-  "jobRef": "QB-XXXX",
+  "jobRef": "BQ-XXXX",
   "summary": "2-3 sentence professional summary of the works",
   "lineItems": [
     { "category": "Labour", "description": "Detailed description", "unit": "hrs", "qty": 4, "rate": 35.00, "total": 140.00 }
@@ -50,7 +51,7 @@ CRITICAL JSON RULES:
 - No trailing commas after the last item in any array or object
 - All numeric fields must be plain numbers only
 - Keep description text simple, avoid special characters
-- jobRef must be QB- followed by 4 random digits, e.g. QB-3847`;
+- jobRef must be BQ- followed by 4 random digits, e.g. BQ-3847`;
 
 
 const TRADES = [
@@ -225,7 +226,7 @@ function duplicateInHistory(id) {
       status: "draft",
       quote: {
         ...original.quote,
-        jobRef: "QB-" + Math.floor(1000 + Math.random() * 9000),
+        jobRef: "BQ-" + Math.floor(1000 + Math.random() * 9000),
       }
     };
     const updated = [copy, ...history].slice(0, 50);
@@ -559,7 +560,7 @@ function EditableCell({ value, onChange, isQty=false }) {
   );
 }
 
-function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatRegistered=true, historyId, jobDesc, onQuoteChange, onSaveTerms, onReset }) {
+function QuoteResult({ quote:init, clientInfo, companyName, defaultTerms, vatRegistered=true, cisRegistered=false, cisRate=20, historyId, jobDesc, onQuoteChange, onSaveTerms, onReset }) {
   const initQ = {...init, notes: defaultTerms || init.notes};
   if (!vatRegistered) { initQ.vatAmount = 0; initQ.grandTotal = initQ.subtotal; }
   const [q, setQ] = useState(initQ);
@@ -1111,6 +1112,8 @@ export default function App() {
   const [defaultTerms, setDefaultTerms] = useState(saved.defaultTerms||DEFAULT_TERMS);
   const [labourRate, setLabourRate] = useState(saved.labourRate||"");
   const [vatRegistered, setVatRegistered] = useState(saved.vatRegistered !== false);
+  const [cisRegistered, setCisRegistered] = useState(saved.cisRegistered===true);
+  const [cisRate, setCisRate] = useState(saved.cisRate||20);
   const [tradeType, setTradeType] = useState(saved.tradeType||"");
   const [quoteCount, setQuoteCount] = useState(getQuoteCount());
   const [proUnlocked, setProUnlocked] = useState(false);
@@ -1150,8 +1153,8 @@ export default function App() {
 
   // Auto-save settings when company name or terms change
   useEffect(()=>{
-    saveSettings({companyName, defaultTerms, labourRate, vatRegistered, tradeType});
-  },[companyName, defaultTerms, labourRate, vatRegistered]);
+    saveSettings({companyName, defaultTerms, labourRate, vatRegistered, tradeType, cisRegistered, cisRate});
+  },[companyName, defaultTerms, labourRate, vatRegistered, tradeType, cisRegistered, cisRate]);
 
   const generate = async () => {
     if (jobDesc.trim().length < 15) return;
@@ -1295,6 +1298,33 @@ export default function App() {
                   {vatRegistered?"VAT REGISTERED — 20% added to quotes":"NOT VAT REGISTERED — no VAT on quotes"}
                 </span>
               </div>
+            </div>
+
+            <div style={{marginBottom:"14px"}}>
+              <label style={lbl}>CIS REGISTERED (CONSTRUCTION INDUSTRY SCHEME)</label>
+              <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"8px"}}>
+                <button
+                  onClick={()=>{ const v = !cisRegistered; setCisRegistered(v); saveSettings({companyName,defaultTerms,labourRate,vatRegistered,tradeType,cisRegistered:v,cisRate}); }}
+                  style={{width:"48px",height:"26px",borderRadius:"13px",border:"none",cursor:"pointer",background:cisRegistered?"#2563eb":"#1a2a3a",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                  <div style={{width:"20px",height:"20px",borderRadius:"50%",background:"#fff",position:"absolute",top:"3px",left:cisRegistered?"25px":"3px",transition:"left 0.2s"}}/>
+                </button>
+                <span style={{color:cisRegistered?"#60a5fa":"#6b7280",fontSize:"13px",fontFamily:"'DM Mono',monospace",fontWeight:600}}>
+                  {cisRegistered?"CIS ENABLED — deduction applied to labour":"CIS DISABLED"}
+                </span>
+              </div>
+              {cisRegistered&&(
+                <div style={{display:"flex",alignItems:"center",gap:"12px",marginTop:"8px"}}>
+                  <label style={{...lbl,margin:0}}>DEDUCTION RATE</label>
+                  {[20,30].map(r=>(
+                    <button key={r} onClick={()=>{ setCisRate(r); saveSettings({companyName,defaultTerms,labourRate,vatRegistered,tradeType,cisRegistered,cisRate:r}); }}
+                      style={{background:cisRate===r?"rgba(37,99,235,0.2)":"transparent",border:`1px solid ${cisRate===r?"#2563eb":"rgba(37,99,235,0.2)"}`,color:cisRate===r?"#60a5fa":"#6b7280",borderRadius:"6px",padding:"4px 12px",fontSize:"12px",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontWeight:cisRate===r?700:400}}>
+                      {r}%
+                    </button>
+                  ))}
+                  <span style={{color:"#6b7280",fontSize:"11px",fontFamily:"'DM Mono',monospace"}}>applied to labour only</span>
+                </div>
+              )}
+              <div style={{color:"#94a3b8",fontSize:"11px",fontFamily:"'DM Mono',monospace",marginTop:"8px"}}>For subcontractors working under CIS — deduction shown on quote for client reference.</div>
             </div>
 
             <div style={{marginBottom:"14px"}}>
