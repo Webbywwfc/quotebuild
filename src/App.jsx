@@ -131,7 +131,15 @@ const QUOTE_COUNT_KEY = "briefquote_quote_count";
 const EMAIL_KEY = "briefquote_email";
 const PRO_KEY = "briefquote_pro";
 const FREE_LIMIT = 3;
-const STRIPE_URL = "https://buy.stripe.com/7sYeVd8kO0xp3EK5qF48000";
+async function startCheckout(email) {
+  const res = await fetch('/api/create-checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email || '' }),
+  });
+  const data = await res.json();
+  if (data.url) window.location.href = data.url;
+}
 
 function getQuoteCount() {
   try { return parseInt(localStorage.getItem(QUOTE_COUNT_KEY)||"0",10); } catch { return 0; }
@@ -1072,10 +1080,11 @@ function PaywallModal({ onClose, onUnlock, userEmail }) {
           ))}
         </div>
 
-        <a href={STRIPE_URL} target="_blank" rel="noreferrer"
-          style={{display:"block",width:"100%",background:"#2563eb",border:"none",color:"#fff",padding:"14px",borderRadius:"10px",fontSize:"16px",fontWeight:700,letterSpacing:"0.04em",cursor:"pointer",textAlign:"center",textDecoration:"none",boxShadow:"0 0 30px rgba(37,99,235,0.35)",fontFamily:"'Outfit', sans-serif",marginBottom:"16px"}}>
-          UPGRADE NOW — £14.99/MONTH →
-        </a>
+<button
+  onClick={()=>startCheckout(email)}
+  style={{display:"block",width:"100%",background:"#2563eb",border:"none",color:"#fff",padding:"14px",borderRadius:"10px",fontSize:"16px",fontWeight:700,letterSpacing:"0.04em",cursor:"pointer",textAlign:"center",boxShadow:"0 0 30px rgba(37,99,235,0.35)",fontFamily:"'Outfit', sans-serif",marginBottom:"16px"}}>
+  UPGRADE NOW — £14.99/MONTH →
+</button>
 
         <div style={{borderTop:"1px solid rgba(37,99,235,0.15)",paddingTop:"16px"}}>
           <div style={{color:"#6b7280",fontSize:"11px",...mo,marginBottom:"8px",textAlign:"center"}}>ALREADY SUBSCRIBED? ENTER YOUR EMAIL TO UNLOCK</div>
@@ -1105,6 +1114,9 @@ function PaywallModal({ onClose, onUnlock, userEmail }) {
 }
 
 export default function App() {
+ const urlParams = new URLSearchParams(window.location.search);
+const sessionId = urlParams.get('session_id');
+if (sessionId) return <SuccessPage sessionId={sessionId} />;
   const saved = loadSettings();
   const isFirstTime = !saved.companyName;
   const [step, setStep] = useState(isFirstTime ? "setup" : "form");
