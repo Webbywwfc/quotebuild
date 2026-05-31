@@ -1068,6 +1068,54 @@ function SuccessPage({ sessionId }) {
   );
 }
 
+function FeedbackModal({ onClose }) {
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState("idle");
+  const mo = { fontFamily: "'DM Mono', monospace" };
+
+  const handleSubmit = async () => {
+    if (!message.trim()) return;
+    setStatus("loading");
+    try {
+      await fetch("https://formspree.io/f/xzdwqdqq", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, _subject: "BriefQuote App Feedback" }),
+      });
+      setStatus("success");
+    } catch {
+      setStatus("error");
+    }
+  };
+
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}}>
+      <div style={{background:"#091424",border:"1px solid rgba(37,99,235,0.2)",borderTop:"3px solid #2563eb",borderRadius:"12px",padding:"24px",maxWidth:"420px",width:"100%"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}}>
+          <h2 style={{margin:0,fontSize:"18px",fontWeight:800,color:"#fff",fontFamily:"'Outfit', sans-serif"}}>Send Feedback</h2>
+          <button onClick={onClose} style={{background:"transparent",border:"1px solid rgba(37,99,235,0.2)",color:"#6b7280",padding:"4px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer"}}>✕</button>
+        </div>
+        {status==="success" ? (
+          <div style={{textAlign:"center",padding:"20px 0"}}>
+            <div style={{fontSize:"32px",marginBottom:"8px"}}>🙏</div>
+            <p style={{color:"#60a5fa",fontSize:"14px",...mo}}>Thanks for your feedback!</p>
+            <button onClick={onClose} style={{background:"#2563eb",border:"none",color:"#fff",padding:"8px 16px",borderRadius:"6px",...mo,fontSize:"12px",cursor:"pointer",marginTop:"8px"}}>CLOSE</button>
+          </div>
+        ) : (
+          <>
+            <p style={{color:"#9ca3af",fontSize:"13px",marginBottom:"12px"}}>What could be better? Any bugs or ideas welcome.</p>
+            <textarea value={message} onChange={e=>setMessage(e.target.value)} rows={5} placeholder="Your feedback..."
+              style={{width:"100%",background:"#1e3a5f",border:"1px solid rgba(96,165,250,0.25)",borderRadius:"8px",padding:"10px 12px",color:"#f1f5f9",fontSize:"14px",fontFamily:"'DM Sans',sans-serif",resize:"vertical",marginBottom:"12px"}}/>
+            <button onClick={handleSubmit} disabled={status==="loading"||!message.trim()}
+              style={{width:"100%",background:"#2563eb",border:"none",color:"#fff",padding:"10px",borderRadius:"8px",fontSize:"14px",fontWeight:700,cursor:"pointer",fontFamily:"'Outfit',sans-serif",opacity:status==="loading"?0.7:1}}>
+              {status==="loading" ? "SENDING..." : "SEND FEEDBACK →"}
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 function AccountPanel({ onClose, userEmail, proUnlocked }) {
   const [portalLoading, setPortalLoading] = useState(false);
   const mo = { fontFamily: "'DM Mono', monospace" };
@@ -1229,6 +1277,7 @@ export default function App() {
   const [estimatedHours, setEstimatedHours] = useState("");
   const [materialsHints, setMaterialsHints] = useState("");
   const [showClient, setShowClient] = useState(false);
+ const [showFeedback, setShowFeedback] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
@@ -1348,7 +1397,7 @@ export default function App() {
           </div>
         </div>
       </div>
-
+{showFeedback && <FeedbackModal onClose={()=>setShowFeedback(false)}/>}
       {showAccount&&(
         <AccountPanel
           onClose={()=>setShowAccount(false)}
@@ -1641,11 +1690,12 @@ export default function App() {
       </div>
 
       <div className="no-print" style={{borderTop:"1px solid rgba(37,99,235,0.1)",padding:"12px 20px",marginTop:"24px"}}>
-        <div style={{maxWidth:"740px",margin:"0 auto",display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
-          <span style={{color:"#6b7280",fontSize:"11px",...mo}}>BRIEFQUOTE © 2026</span>
-          <span style={{color:"#6b7280",fontSize:"11px",...mo}}>ALWAYS VERIFY RATES WITH YOUR SUPPLIER</span>
-        </div>
-      </div>
-    </div>
-  );
-}
+  <div style={{maxWidth:"740px",margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"8px"}}>
+    <span style={{color:"#6b7280",fontSize:"11px",fontFamily:"'DM Mono',monospace"}}>BRIEFQUOTE © 2026</span>
+    <button onClick={()=>setShowFeedback(true)}
+      style={{background:"transparent",border:"1px solid rgba(37,99,235,0.2)",color:"#6b7280",padding:"4px 12px",borderRadius:"6px",fontFamily:"'DM Mono',monospace",fontSize:"11px",cursor:"pointer"}}>
+      ✦ FEEDBACK
+    </button>
+    <span style={{color:"#6b7280",fontSize:"11px",fontFamily:"'DM Mono',monospace"}}>ALWAYS VERIFY RATES WITH YOUR SUPPLIER</span>
+  </div>
+</div>
