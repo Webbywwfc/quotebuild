@@ -1699,3 +1699,6 @@ export default function App() {
     <span style={{color:"#6b7280",fontSize:"11px",fontFamily:"'DM Mono',monospace"}}>ALWAYS VERIFY RATES WITH YOUR SUPPLIER</span>
   </div>
 </div>
+</div>
+  );
+}
