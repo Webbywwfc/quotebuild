@@ -143,6 +143,17 @@ async function startCheckout(email) {
   if (data.url) window.location.href = data.url;
 }
 
+async function openCustomerPortal(email) {
+  const res = await fetch('/api/customer-portal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  const data = await res.json();
+  if (data.url) window.location.href = data.url;
+  else alert('Could not open subscription portal. Please contact hello@briefquote.co.uk');
+}
+
 function getQuoteCount() {
   try { return parseInt(localStorage.getItem(QUOTE_COUNT_KEY)||"0",10); } catch { return 0; }
 }
@@ -1057,6 +1068,57 @@ function SuccessPage({ sessionId }) {
   );
 }
 
+function AccountPanel({ onClose, userEmail, proUnlocked }) {
+  const [portalLoading, setPortalLoading] = useState(false);
+  const mo = { fontFamily: "'DM Mono', monospace" };
+
+  const handlePortal = async () => {
+    if (!userEmail) { alert('No email saved. Please set your email in Settings first.'); return; }
+    setPortalLoading(true);
+    await openCustomerPortal(userEmail);
+    setPortalLoading(false);
+  };
+
+  return (
+    <div style={{background:"rgba(5,13,26,0.97)",borderBottom:"1px solid rgba(37,99,235,0.12)",padding:"0 20px"}}>
+      <div style={{maxWidth:"740px",margin:"0 auto",padding:"20px 0"}}>
+        <div style={{color:"#60a5fa",fontSize:"11px",...mo,letterSpacing:"0.1em",marginBottom:"14px"}}>👤 ACCOUNT</div>
+        <div style={{background:"#091424",border:"1px solid rgba(37,99,235,0.15)",borderRadius:"10px",padding:"20px",marginBottom:"12px"}}>
+          <div style={{marginBottom:"16px"}}>
+            <div style={{color:"#6b7280",fontSize:"11px",...mo,marginBottom:"4px"}}>EMAIL</div>
+            <div style={{color:"#fff",fontSize:"14px",fontWeight:600}}>{userEmail || "— not set"}</div>
+          </div>
+          <div>
+            <div style={{color:"#6b7280",fontSize:"11px",...mo,marginBottom:"4px"}}>PLAN</div>
+            <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+              {proUnlocked ? (
+                <span style={{background:"rgba(37,99,235,0.15)",border:"1px solid #2563eb",color:"#60a5fa",borderRadius:"4px",padding:"3px 10px",fontSize:"11px",...mo,fontWeight:700}}>✓ PRO ACTIVE</span>
+              ) : (
+                <span style={{background:"#091424",border:"1px solid rgba(37,99,235,0.2)",color:"#6b7280",borderRadius:"4px",padding:"3px 10px",fontSize:"11px",...mo,fontWeight:700}}>FREE</span>
+              )}
+            </div>
+          </div>
+        </div>
+        {proUnlocked && (
+          <button onClick={handlePortal} disabled={portalLoading}
+            style={{background:"#112540",border:"1px solid rgba(37,99,235,0.3)",color:"#60a5fa",borderRadius:"8px",padding:"10px 16px",fontSize:"12px",cursor:"pointer",...mo,fontWeight:700,marginBottom:"8px",opacity:portalLoading?0.7:1}}>
+            {portalLoading ? "LOADING..." : "⚙ MANAGE SUBSCRIPTION →"}
+          </button>
+        )}
+        {!proUnlocked && (
+          <button onClick={()=>startCheckout(userEmail)}
+            style={{background:"#2563eb",border:"none",color:"#fff",borderRadius:"8px",padding:"10px 16px",fontSize:"12px",cursor:"pointer",...mo,fontWeight:700,marginBottom:"8px"}}>
+            UPGRADE TO PRO — £14.99/MONTH →
+          </button>
+        )}
+        <div style={{color:"#4b5563",fontSize:"11px",...mo,marginTop:"4px"}}>
+          {proUnlocked ? "Manage or cancel your subscription via the Stripe portal." : "Upgrade to generate unlimited quotes."}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PaywallModal({ onClose, onUnlock, userEmail }) {
   const [email, setEmail] = useState(userEmail||"");
   const [checking, setChecking] = useState(false);
@@ -1169,6 +1231,7 @@ export default function App() {
   const [showClient, setShowClient] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
   const [quote, setQuote] = useState(null);
   const [currentHistoryId, setCurrentHistoryId] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
@@ -1269,11 +1332,15 @@ export default function App() {
             </div>
           </div>
           <div style={{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap",justifyContent:"flex-end"}}>
-            <button onClick={()=>setShowHistory(v=>!v)}
+            <button onClick={()=>{ setShowAccount(v=>!v); setShowHistory(false); setShowSettings(false); }}
+              style={{background:showAccount?"#112540":"transparent",border:"1px solid rgba(37,99,235,0.2)",color:showAccount?"#3b82f6":"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
+              👤 ACCOUNT
+            </button>
+            <button onClick={()=>{ setShowHistory(v=>!v); setShowAccount(false); setShowSettings(false); }}
               style={{background:showHistory?"#112540":"transparent",border:"1px solid rgba(37,99,235,0.2)",color:showHistory?"#3b82f6":"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
               📋 HISTORY
             </button>
-            <button onClick={()=>setShowSettings(v=>!v)}
+            <button onClick={()=>{ setShowSettings(v=>!v); setShowAccount(false); setShowHistory(false); }}
               style={{background:showSettings?"#112540":"transparent",border:"1px solid rgba(37,99,235,0.2)",color:showSettings?"#3b82f6":"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
               ⚙ {showSettings?"HIDE":"SETTINGS"}
             </button>
@@ -1281,6 +1348,14 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {showAccount&&(
+        <AccountPanel
+          onClose={()=>setShowAccount(false)}
+          userEmail={userEmail}
+          proUnlocked={proUnlocked}
+        />
+      )}
 
       {showSettings&&(
         <div className="no-print" style={{background:"rgba(5,13,26,0.97)",borderBottom:"1px solid rgba(37,99,235,0.12)",padding:"0 20px"}}>
