@@ -1193,7 +1193,7 @@ function PaywallModal({ onClose, onUnlock, userEmail }) {
 
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}}>
-      <div style={{background:"linear-gradient(135deg,#0d1e35,#091424)",border:"1px solid rgba(37,99,235,0.4)",borderRadius:"16px",padding:"32px",maxWidth:"420px",width:"100%",boxShadow:"0 0 60px rgba(37,99,235,0.2)"}}>
+      <div style={{background:"linear-gradient(135deg,#0d1e35,#091424)",border:"1px solid rgba(37,99,235,0.4)",borderRadius:"16px",padding:"32px",maxWidth:"420px",width:"100%",boxShadow:"0 0 60px rgba(37,99,235,0.2)",overflowY:"auto",maxHeight:"90vh"}}>
         <div style={{textAlign:"center",marginBottom:"24px"}}>
           <div style={{width:"48px",height:"48px",background:"linear-gradient(135deg,#2563eb,#60a5fa)",borderRadius:"12px",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",boxShadow:"0 0 20px rgba(37,99,235,0.4)"}}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 12H15M9 8H15M9 16H12M5 20H19C20.1 20 21 19.1 21 18V6C21 4.9 20.1 4 19 4H5C3.9 4 3 4.9 3 6V18C3 19.1 3.9 20 5 20Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
