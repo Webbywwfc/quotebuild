@@ -23,6 +23,16 @@ export default async function handler(req, res) {
     );
 
     console.log(`Pro activated for ${normalised} (session: ${sessionId})`);
+
+// Send notification email to hello@briefquote.co.uk
+await fetch('https://formspree.io/f/xzdwqdqq', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    _subject: '🎉 New BriefQuote Pro subscriber!',
+    message: `New Pro subscriber: ${normalised}\nSession: ${sessionId}\nTime: ${new Date().toISOString()}`
+  })
+});
     return res.status(200).json({ success: true });
 
   } catch (err) {
