@@ -1412,7 +1412,7 @@ export default function App() {
             </div>
             <div>
               <div style={{fontSize:"19px",fontWeight:800,color:"#fff",fontFamily:"'Outfit', sans-serif",letterSpacing:"-0.02em",lineHeight:1}}>Brief<span style={{color:"#60a5fa"}}>Quote</span></div>
-              <div style={{color:"#4b5563",fontSize:"10px",fontFamily:"'DM Mono', monospace",letterSpacing:"0.1em"}}>AI QUOTE GENERATOR FOR TRADESMEN</div>
+              <div style={{color:"#6b7280",fontSize:"10px",fontFamily:"'DM Mono', monospace",letterSpacing:"0.1em"}}>AI QUOTE GENERATOR FOR TRADESMEN</div>
             </div>
           </div>
           <div style={{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap",justifyContent:"flex-end"}}>
