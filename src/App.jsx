@@ -1314,12 +1314,24 @@ export default function App() {
   },[companyName, defaultTerms, labourRate, vatRegistered, tradeType, cisRegistered, cisRate]);
 
   const generate = async () => {
-    if (jobDesc.trim().length < 15) return;
-    if (!proUnlocked && quoteCount >= FREE_LIMIT) {
-      setShowPaywall(true);
-      return;
-    }
-    setStep("loading"); setErrorMsg("");
+   if (jobDesc.trim().length < 15) return;
+const savedEmail = getSavedEmail();
+if (!savedEmail) { setStep("form"); return; }
+setStep("loading"); setErrorMsg("");
+
+// Check quote allowance in Upstash
+const trackRes = await fetch('/api/track-quote', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email: savedEmail }),
+});
+const trackData = await trackRes.json();
+if (!trackData.allowed) {
+  setShowPaywall(true);
+  setStep("form");
+  return;
+}
+
     const labourLine = quoteLabourRate
       ? `Labour rate: GBP${quoteLabourRate} per hour - use this exact rate for ALL labour line items.\n${estimatedHours ? `Total labour hours for this job: ${estimatedHours} hours - use this exact figure for the total labour quantity.\n` : ""}`
       : "";
@@ -1698,7 +1710,6 @@ export default function App() {
     </button>
     <span style={{color:"#6b7280",fontSize:"11px",fontFamily:"'DM Mono',monospace"}}>ALWAYS VERIFY RATES WITH YOUR SUPPLIER</span>
   </div>
-</div>
-</div>
+    </div>
   );
 }
