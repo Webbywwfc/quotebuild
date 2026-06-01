@@ -529,10 +529,33 @@ Rules:
 }
 
 function Spinner() {
+  const messages = [
+    "ANALYSING JOB...",
+    "CALCULATING LABOUR RATES...",
+    "PRICING MATERIALS...",
+    "BUILDING YOUR QUOTE...",
+    "ALMOST THERE...",
+  ];
+  const [msgIndex, setMsgIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMsgIndex(i => (i + 1) % messages.length);
+    }, 1800);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"16px",padding:"48px 0"}}>
-      <div style={{width:"44px",height:"44px",border:"3px solid #2a2a2a",borderTop:"3px solid #2563eb",borderRadius:"50%",animation:"spin 0.8s linear infinite"}}/>
-      <p style={{color:"#6b7280",fontFamily:"monospace",fontSize:"13px",letterSpacing:"0.05em"}}>GENERATING QUOTE...</p>
+    <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"20px",padding:"60px 0"}}>
+      <div style={{width:"48px",height:"48px",border:"3px solid #1e3a5f",borderTop:"3px solid #2563eb",borderRadius:"50%",animation:"spin 0.8s linear infinite"}}/>
+      <div style={{textAlign:"center"}}>
+        <p style={{color:"#60a5fa",fontFamily:"'DM Mono',monospace",fontSize:"13px",letterSpacing:"0.08em",animation:"fadeUp 0.4s ease forwards"}} key={msgIndex}>
+          {messages[msgIndex]}
+        </p>
+        <p style={{color:"#4b5563",fontFamily:"'DM Mono',monospace",fontSize:"11px",marginTop:"6px"}}>
+          This usually takes 5–10 seconds
+        </p>
+      </div>
     </div>
   );
 }
