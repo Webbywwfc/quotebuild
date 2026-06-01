@@ -1736,7 +1736,7 @@ export default function App() {
               <textarea value={jobDesc} onChange={e=>setJobDesc(e.target.value)} autoFocus
                 placeholder="e.g. Single storey rear extension, approx 4m x 5m. Brick and block construction with flat roof, bi-fold doors, underfloor heating, plastered and painted. Manchester. Include your location for accurate regional rates."
                 rows={4} style={{...inp,lineHeight:1.6,resize:"vertical",background:"#1e3a5f",color:"#f1f5f9"}}/>
-              <div style={{color:"#60a5fa",fontSize:"11px",...mo,marginTop:"6px",textAlign:"right",letterSpacing:"0.08em"}}>✦ MORE DETAIL = BETTER QUOTE</div>
+              <div style={{color:"#60a5fa",fontSize:"11px",...mo,marginTop:"6px",textAlign:"right",letterSpacing:"0.08em"}}>📍 INCLUDE LOCATION FOR ACCURATE RATES &nbsp;·&nbsp; ✦ MORE DETAIL = BETTER QUOTE</div>
             </div>
             <div style={{background:"rgba(11,25,46,0.95)",border:"1px solid rgba(96,165,250,0.18)",borderRadius:"12px",padding:"22px",marginBottom:"14px"}}>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"16px",marginBottom:"16px"}}>
