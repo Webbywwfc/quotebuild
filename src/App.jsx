@@ -1417,15 +1417,15 @@ export default function App() {
           </div>
           <div style={{display:"flex",gap:"6px",alignItems:"center",flexWrap:"wrap",justifyContent:"flex-end"}}>
             <button onClick={()=>{ setShowAccount(v=>!v); setShowHistory(false); setShowSettings(false); }}
-              style={{background:showAccount?"#112540":"transparent",border:"1px solid rgba(37,99,235,0.2)",color:showAccount?"#3b82f6":"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
+              style={{background:showAccount?"#112540":"transparent",border:"1px solid rgba(37,99,235,0.2)",color:showAccount?"#3b82f6":"#9ca3af",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
               👤 ACCOUNT
             </button>
             <button onClick={()=>{ setShowHistory(v=>!v); setShowAccount(false); setShowSettings(false); }}
-              style={{background:showHistory?"#112540":"transparent",border:"1px solid rgba(37,99,235,0.2)",color:showHistory?"#3b82f6":"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
+              style={{background:showHistory?"#112540":"transparent",border:"1px solid rgba(37,99,235,0.2)",color:showHistory?"#3b82f6":"#9ca3af",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
               📋 HISTORY
             </button>
             <button onClick={()=>{ setShowSettings(v=>!v); setShowAccount(false); setShowHistory(false); }}
-              style={{background:showSettings?"#112540":"transparent",border:"1px solid rgba(37,99,235,0.2)",color:showSettings?"#3b82f6":"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
+              style={{background:showSettings?"#112540":"transparent",border:"1px solid rgba(37,99,235,0.2)",color:showSettings?"#3b82f6":"#9ca3af",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>
               ⚙ {showSettings?"HIDE":"SETTINGS"}
             </button>
             {step==="result"&&<button onClick={reset} style={{background:"transparent",border:"1px solid rgba(37,99,235,0.2)",color:"#6b7280",padding:"5px 10px",borderRadius:"6px",...mo,fontSize:"11px",cursor:"pointer",whiteSpace:"nowrap"}}>← NEW QUOTE</button>}
