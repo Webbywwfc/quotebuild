@@ -206,6 +206,46 @@ CRITICAL JSON RULES:
 - All numeric fields must be plain numbers only
 - Keep description text simple, avoid special characters
 - jobRef must be BQ- followed by 4 random digits, e.g. BQ-3847`;
+const TRADES = [
+  "General Builder",
+  "Bricklayer",
+  "Groundworker",
+  "Plasterer",
+  "Plumber",
+  "Electrician",
+  "Gas Engineer",
+  "Roofer",
+  "Joiner / Carpenter",
+  "Tiler",
+  "Painter & Decorator",
+  "Landscaper",
+  "Other / Multi-Trade"
+];
+
+const DEFAULT_TERMS = "Quote valid for 30 days. Rates are indicative - adjust to your local market and supplier pricing. 50% deposit required on acceptance of quote. Balance due within 14 days of completion. All works carry a 12-month workmanship guarantee.";
+
+const css = `
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pulse { 0%, 100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.8); } }
+  * { box-sizing:border-box; }
+  body { background: #050d1a; font-family: 'DM Sans', sans-serif; }
+  body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 80% 60% at 20% -10%, rgba(37,99,235,0.14) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 110%, rgba(37,99,235,0.10) 0%, transparent 60%), radial-gradient(ellipse 40% 40% at 50% 50%, rgba(37,99,235,0.03) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+  body::after { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(37,99,235,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,0.03) 1px, transparent 1px); background-size: 60px 60px; pointer-events: none; z-index: 0; }
+  #root { position: relative; z-index: 1; }
+  input, textarea { outline:none !important; }
+  input::placeholder, textarea::placeholder { color: #4b5563; }
+  .no-print {}
+  @media print { .no-print { display:none !important; } body { margin:0; } }
+  .btn-glow:hover { box-shadow: 0 0 24px rgba(37,99,235,0.5) !important; transform: translateY(-1px); }
+  .card-hover:hover { border-color: rgba(37,99,235,0.35) !important; transform: translateY(-1px); }
+  input:focus, textarea:focus { border-color: rgba(96,165,250,0.7) !important; box-shadow: 0 0 0 3px rgba(37,99,235,0.15) !important; background: #1e3a5f !important; }
+  input::placeholder, textarea::placeholder { color: #64748b !important; }
+  select:focus { border-color: rgba(96,165,250,0.7) !important; }
+  @media (max-width: 600px) { .line-items-header { display: none !important; } .line-item-desktop { display: none !important; } .line-item-mobile { display: flex !important; } }
+  @media (min-width: 601px) { .line-item-mobile { display: none !important; } .line-item-desktop { display: grid !important; } }
+`;
 const STORAGE_KEY = "briefquote_settings";
 const HISTORY_KEY = "briefquote_history";
 const QUOTE_COUNT_KEY = "briefquote_quote_count";
