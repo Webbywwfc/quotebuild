@@ -1728,7 +1728,7 @@ export default function App() {
         <div style={{maxWidth:"740px",margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"8px"}}>
           <span style={{color:"#6b7280",fontSize:"11px",...mo}}>BRIEFQUOTE © 2026</span>
           <button onClick={()=>setShowFeedback(true)}
-            style={{background:"transparent",border:"1px solid rgba(37,99,235,0.2)",color:"#6b7280",padding:"4px 12px",borderRadius:"6px",fontFamily:"'DM Mono',monospace",fontSize:"11px",cursor:"pointer"}}>
+            style={{background:"transparent",border:"1px solid rgba(37,99,235,0.2)",color:"#9ca3af",padding:"4px 12px",borderRadius:"6px",fontFamily:"'DM Mono',monospace",fontSize:"11px",cursor:"pointer"}}>
             ✦ FEEDBACK
           </button>
           <span style={{color:"#6b7280",fontSize:"11px",...mo}}>ALWAYS VERIFY RATES WITH YOUR SUPPLIER</span>
