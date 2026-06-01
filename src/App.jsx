@@ -1317,7 +1317,7 @@ export default function App() {
   const generate = async () => {
     if (jobDesc.trim().length < 15) return;
     const savedEmail = getSavedEmail();
-    if (!savedEmail) { setStep("form"); return; }
+    if (!savedEmail) { alert("Please add your email in Settings before generating quotes."); return; }
     setStep("loading"); setErrorMsg("");
 
     // Check quote allowance in Upstash
@@ -1543,7 +1543,7 @@ export default function App() {
                 ))}
               </div>
             </div>
-            <button onClick={()=>{ if(!companyName.trim()){ alert("Please enter your company name."); return; } if(!tradeType){ alert("Please select your trade."); return; } saveSettings({companyName,defaultTerms,tradeType}); setStep("form"); }}
+            <button onClick={()=>{ if(!companyName.trim()){ alert("Please enter your company name."); return; } if(!userEmail.trim() || !userEmail.includes('@')){ alert("Please enter your email address."); return; } if(!tradeType){ alert("Please select your trade."); return; } saveEmail(userEmail); saveSettings({companyName,defaultTerms,tradeType}); setStep("form"); }}
               style={{width:"100%",background:"#3b82f6",border:"none",color:"#000",padding:"14px 24px",borderRadius:"8px",fontSize:"18px",fontWeight:800,letterSpacing:"0.04em",cursor:"pointer",marginBottom:"12px"}}>
               START GENERATING QUOTES →
             </button>
